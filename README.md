@@ -1,11 +1,11 @@
 **#AWS Interview Questions**
 
-1. What is Amazon EC2:
+##1. What is Amazon EC2:
           Amazon Elastic compute cloud provides on-demand capacity in AWS cloud. It allows users to launch virtual machines(instances) on demand and scale them up and down as needed.
-2. What are the different types of EC2 Instances:
+##2. What are the different types of EC2 Instances:
           EC2 instances are categoized as 
               1) General Purpose 2) Compute Optimized 3) Memory Optimized 4) Storage Optimized 5) Accelerated Computing
-3. What are the differences between On-Demand, Reserved and Spot Instances:
+##3. What are the differences between On-Demand, Reserved and Spot Instances:
           On-Demand: Pay per sec/min, no commitment. Best used for short term or unpredictable workloads
           Reserved: 1-3 yr commitment, upto 75% cheaper than on-demand. Best used for long term and steady workloads
           Spot-instances: upto 90% cheaper but can be terminated by AWS. Best used for fault tolerant workloads.
