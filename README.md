@@ -1,3 +1,5 @@
+**#AWS Interview Questions**
+
 1. What is Amazon EC2:
           Amazon Elastic compute cloud provides on-demand capacity in AWS cloud. It allows users to launch virtual machines(instances) on demand and scale them up and down as needed.
 2. What are the different types of EC2 Instances:
@@ -77,4 +79,5 @@
             -> Fallback to On-Demand Instances – If Spot capacity is unavailable, it can launch On-Demand instances.
                  * Use a Spot Instance if you need a temporary compute resource for running simulations.
                  * Use a Spot Fleet to run large-scale machine learning models, ensuring cost savings and availability by dynamically managing Spot capacity.
+20. What is difference between EC2 autoscaling and 
                   
