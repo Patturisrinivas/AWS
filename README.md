@@ -83,3 +83,51 @@
 ### 20. What is difference between EC2 Auto Scaling and Elastic Load Balancing (ELB):
             Auto Scaling ensures the right number of instances are running based on demand. 
             ELB distributes traffic across multiple instances to improve fault tolerance.
+## DAY3
+### 21. What happens when an EC2 instance running a web application is stopped and restarted:
+            The public IP changes unless an Elastic IP is attached.
+            EBS volumes remain intact, but instance store data is lost.
+            The instance retains its private IP and security group settings
+### 22. What is EC2’s default tenancy? What is Dedicated Instance vs Dedicated Host:
+            Default Tenancy: EC2 instances run on shared hardware.
+            Dedicated Instance: Runs on dedicated hardware for a single AWS account.
+            Dedicated Host: Provides a physical server that can be used for compliance and licensing needs.
+### 23. How do you encrypt data in EC2:
+            EBS Encryption: Encrypts data at rest using AWS KMS.
+            SSL/TLS: Encrypts data in transit.
+            Instance-level Encryption: Use LUKS (Linux Unified Key Setup) for encrypting volumes.
+            S3 Encryption: Use SSE-S3 or SSE-KMS for encrypted object storage.
+### 24. What are EC2 Capacity Reservations:
+            Capacity Reservations reserve compute capacity in a specific AZ without long-term commitment (unlike Reserved Instances).
+            Use Capacity Reservations if you need guaranteed availability for critical applications during peak demand.
+### 25. Can you change the instance type of a running EC2 instance:
+            No, you must stop the instance first, then modify the instance type.
+### 26. What is Amazon EC2 Serial Console:
+            A feature that provides low-level access to an instance for troubleshooting without network connectivity.
+            If an instance is unresponsive, use Serial Console to check system logs and fix boot issues.
+### 27. What is the difference between Replacing Root Volume and Rebuilding an Instance:
+            Replacing Root Volume: Creates a new root volume but keeps the instance ID
+            Rebuilding an Instance: Terminates the instance and creates a new one
+            Use Replace Root Volume if you need to restore a corrupted OS without changing instance settings
+### 28. What is Amazon S3:
+           Amazon S3 (Simple Storage Service) is an object storage service that allows users to store and retrieve unlimited data. Unlike file or block storage, S3                     stores data as objects in a flat namespace inside buckets. It provides:
+                Scalability – Stores unlimited data
+                Durability – 99.999999999% (11 9’s) durability
+                Security – Supports encryption and IAM policies
+                Data Availability – 99.99% availability
+                Data Integrity: Uses checksums (MD5, CRC) for corruption detection
+### 29. What are the key features of Amazon S3:
+              Object Storage – Data is stored as objects with metadata
+              Unlimited Storage – No limit on the number or size of objects
+              Durability & Availability – 11 9’s durability with automatic replication
+              Lifecycle Management – Moves objects between storage classes automatically
+              Versioning – Keeps multiple versions of an object
+              Replication – Supports Cross-Region and Same-Region Replication
+### 30. What are Amazon S3 storage classes:
+                   Storage Class                     Use Case                                                 Durability	  Availability	 Cost
+                S3 Standard	                    General-purpose	                                          11 9’s	            99.99%	           High
+                S3 Intelligent-Tiering	      Auto-moves objects between frequent & infrequent tiers	  11 9’s	            99.9%	           Moderate
+                S3 Standard-IA	        Infrequent access (e.g., backups)	                      11 9’s	            99.9%	           Lower
+                S3 One Zone-IA	        Infrequent access in a single AZ	                      11 9’s	            99.5%	          Cheaper
+                S3 Glacier	                   Archival storage (retrieval in minutes)	                      11 9’s	            99.99%	           Very Low
+                S3 Glacier Deep Archive	      Long-term archival (retrieval in hours)	                      11 9’s	            99.99%	           Lowest
