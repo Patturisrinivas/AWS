@@ -131,3 +131,57 @@
                 S3 One Zone-IA	        Infrequent access in a single AZ	                      11 9’s	            99.5%	          Cheaper
                 S3 Glacier	                   Archival storage (retrieval in minutes)	                      11 9’s	            99.99%	           Very Low
                 S3 Glacier Deep Archive	      Long-term archival (retrieval in hours)	                      11 9’s	            99.99%	           Lowest
+## DAY4
+### 31. What is the difference between Object Storage and Block Storage:
+          Object Storage (S3) - Stores files with metadata, optimized for scalability.
+          Block Storage (EBS, EFS) - Stores data in blocks, ideal for databases and low-latency apps.
+          Example:
+                Use S3 for storing images, videos, backups
+                Use EBS for running a database like MySQL
+### 32. What is S3 bucket:
+          An S3 bucket is a container where objects are stored. Key bucket properties:
+                  Globally unique name (e.g my-aws-bucket)
+                  Region-specific storage (e.g us-east-1)
+                  access control using IAM policies or ACLs
+### 33. How does S3 achieve high durability:
+        Stores data across multiple Availability Zones (AZs).
+        Automatically replicates objects.
+        Uses checksums to detect and fix data corruption
+### 34. How does S3 ensure data security:
+        IAM Policies – Control access to S3 buckets
+        Bucket Policies – Allow/deny access to specific users
+        Encryption – Supports server-side (SSE-S3, SSE-KMS) and client-side encryption
+        MFA Delete – Requires multi-factor authentication to delete objects
+### 35. What is the difference between S3 Object ACL and Bucket Policy:
+                Feature                ACL                Bucket policy
+                Granularity        Object Level          Bucket leve
+                Access Control      Users & Accounts      IAM users, roles
+                Complexity          Simple                More flexible
+            Use ACLs for fine-grained permissions on specific objects
+            Use Bucket Policies to apply rules to the entire bucket
+### 36. What is Cross-Origin Resource Sharing (CORS) in S3:
+        CORS allows browsers to access S3 resources from different domains. Cross-Origin Resource Sharing (CORS) in Amazon S3 is a security mechanism that allows a web application running on one domain to access resources (like images, fonts, or JSON files) stored in an S3 bucket on a different domain. This is necessary because            browsers enforce the Same-Origin Policy (SOP), which restricts cross-origin requests by default.
+        A website hosted on https://example.com wants to load an image from an S3 bucket at https://mybucket.s3.amazonaws.com. Without CORS, the browser blocks the request.         By configuring CORS on the bucket, we can allow specific domains to access the resources.
+### 37. How does CORS differ from IAM policies or Bucket Policies:
+           IAM/Bucket policies control who can access S3
+           CORS controls how cross-origin requests are handled by browsers
+### 38. What happens if CORS is misconfigured:
+           The browser blocks cross-origin requests, leading to CORS errors in the console
+### 39. How do you host a static website on S3:
+           Enable static website hosting in bucket settings
+           Upload index.html and error.html.
+           Set a Bucket Policy to allow public access
+### 40. Can S3 host dynamic websites (PHP, Python):
+           No. S3 only serves static content. For dynamic content, use Lambda, API Gateway, or EC2
+### 41. How do you add HTTPS to an S3 website:
+           Use CloudFront with an SSL certificate (ACM)
+### 42. How do you prevent unauthorized access:
+           Use Bucket Policies, IAM roles, and restrict public access
+### 43. What is S3 Event Notification:
+           Amazon S3 Event Notifications allow you to automatically trigger actions when specific events happen in an S3 bucket, such as file uploads, deletions, or                    modifications. These events can be sent to various AWS services for further processing.
+           how it works: An event occurs in the S3 bucket. S3 detects the event and sends a notification. The notification is delivered to a destination like: 1) AWS Lambda            → Trigger a serverless function. 2) Amazon SNS (Simple Notification Service) → Send notifications. 3) Amazon SQS (Simple Queue Service) → Store events in a queue 
+           for processing. Example: Suppose you have an image-processing application where users upload images to an S3 bucket. You can configure an S3 event notification              to trigger an AWS Lambda function that resizes and optimizes the image automatically
+### 44. Can S3 Event Notifications trigger multiple destinations:
+           No, one event can have only one destination
+### 45. How can you ensure reliable processing of S3 events:
+           Use Amazon SQS to queue events and prevent loss
