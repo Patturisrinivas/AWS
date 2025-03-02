@@ -185,3 +185,67 @@
            No, one event can have only one destination
 ### 45. How can you ensure reliable processing of S3 events:
            Use Amazon SQS to queue events and prevent loss
+## DAY5
+### 46. How do you handle duplicate event notifications:
+           Implement idempotency in Lambda functions to process events only once
+### 47. What are S3 Access Points:
+           S3 Access Points provide a customized way to manage access to S3 buckets by allowing you to create dedicated endpoints with specific permissions for different               applications, teams, or workloads. 
+           Instead of managing bucket-wide policies, you can create multiple access points, each with its own access policy, simplifying access control in large-scale                  environments.
+### 48. When to Use S3 Access Points vs. IAM Roles/Policies:
+           Use S3 Access Points when: 
+                You need different applications or teams to access the same bucket with different rules.
+                You want to restrict access to a VPC
+                You want to avoid a complex bucket policy
+           Use IAM Roles/Policies when:
+                You want to control access at the user or service level across AWS
+                You need cross-account access
+                You want centralized permission management across services
+### 49. Can an S3 bucket have multiple Access Points:
+           Yes, you can create multiple access points per bucket for different users/apps
+### 50. How do you enforce VPC-only access to an S3 bucket:
+           Use an S3 Access Point with VPC restrictions
+### 51. Can you use an access point for cross-account access:
+           Yes, you can grant access to external AWS accounts via access point policies
+### 52. What is Amazon S3 Object Lock:
+            S3 Object Lock prevents object deletion or modification for a specified period
+### 53. How does S3 Select work:
+            S3 Select allows querying only specific data from an object instead of retrieving the full object.
+            SELECT * FROM S3Object s WHERE s.city = 'New York'
+### 54. What is S3 Multipart Upload:
+            Multipart Upload allows uploading large objects in parts to improve performance.
+### 55. How does S3 Pricing Work:
+            S3 pricing is based on: (1) Storage per GB (varies by storage class) (2) Requests (GET, PUT, DELETE) (3) Data transfer (between AWS regions)
+### 56. What is Amazon S3 Access Analyzer:
+            It identifies misconfigured bucket policies that allow unintended public access
+### 57. What is the difference between ACLs and Security Groups in AWS:
+            Access Control Lists (ACLs) and Security Groups are both used for controlling access, but they serve different purposes in AWS.
+            An **ACL** in AWS is a rule-based access control mechanism that manages permissions at the resource level. There are two main types:
+                 **S3 ACLs** → Control access to individual objects or buckets in Amazon S3.
+                 **Network ACLs (NACLs)** → Control inbound and outbound traffic at the subnet level in a VPC.
+                  For example, in S3, ACLs are used when you need to grant specific permissions (read, write) on a per-object basis. In a VPC, network ACLs act as a firewall at the subnet level, filtering traffic before it reaches EC2 instances.
+            A **Security Group** is a virtual firewall that controls inbound and outbound traffic for EC2 instances or AWS services like RDS. Unlike Network ACLs, which apply at the subnet level, security groups apply directly to an instance and are stateful—meaning if you allow inbound traffic, the response traffic is automatically allowed.
+                 For example, if you create a security group for a web server, you can configure it to allow incoming HTTP (port 80) and HTTPS (port 443) traffic but block all other traffic.
+             Key Differences:
+                    ACLs are stateless, meaning inbound and outbound rules are separate, whereas security groups are stateful, meaning responses are automatically allowed.
+                    Network ACLs operate at the subnet level, affecting multiple instances, while security groups apply at the instance level.
+                    S3 ACLs provide object-level permissions, but security groups do not apply to S3—they are used for networking and compute resources.
+
+          * Use ACLs when you need fine-grained control over individual objects (S3 ACLs) or subnets (Network ACLs). Use security groups when you want to protect EC2 instances and control which traffic can reach them
+### 58. What is the difference between S3 Bucket Policies and IAM Policies:
+            S3 Bucket Policy:
+                      Applies to specific S3 bucket 
+                      Controls access at the bucket level
+                      Allows cross-account access
+                      Restrict or allow public access to a bucket
+            IAM Policy:
+                      Applies to IAM users, groups and roles
+                      Can control access to multiple AWS services
+                      Only applies within the same AWS account
+                      Grant users access to multiple AWS services, including S3
+            Bucket Policy: Allow public read access to objects in a bucket.
+            IAM Policy: Allow an IAM user to list all S3 buckets in the account.
+### 59. What is S3 Pre-Signed URL and how does it work:
+             A Pre-Signed URL allows temporary, secure access to private S3 objects without making them public
+### 60. How does Amazon S3 handle eventual consistency:
+             **Strong Consistency**: Any newly created or updated objects are immediately available
+             **Eventual Consistency**: Previously, there was a delay in propagating deletes and overwrites across AZs, but AWS now offers strong read-after-write consistency for all operations
