@@ -294,4 +294,7 @@
 ### 74. What is the maximum memory allocation for a Lambda function:
               Memory allocation ranges from 128MB to 10GB in increments of 1MB
 ### 75. How does AWS Lambda scale automatically:
-              AWS Lambda scales horizontally by running multiple instances of a function concurrently. Each request triggers a new instance if needed, up to the concurrency limit
+              AWS Lambda scales automatically by creating new instances of the function to handle incoming requests. It follows an event-driven model, where each request can trigger a new execution environment.
+             Lambda can scale nearly instantly, handling thousands of concurrent executions by launching additional instances as needed.
+             However, it has concurrency limits (1,000 per region by default) and burst limits (500-3,000 instances initially, then 500 per minute). If the limit is reached, requests may be throttled.
+             Lambda also optimizes execution by reusing warm instances when possible to reduce cold start delays. Scaling behavior varies based on the event source; for example, API Gateway scales per request, while SQS-based invocations scale based on batch size
