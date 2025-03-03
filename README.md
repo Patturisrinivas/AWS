@@ -249,3 +249,49 @@
 ### 60. How does Amazon S3 handle eventual consistency:
              **Strong Consistency**: Any newly created or updated objects are immediately available
              **Eventual Consistency**: Previously, there was a delay in propagating deletes and overwrites across AZs, but AWS now offers strong read-after-write consistency for all operations
+## DAY6
+### 61. What is the difference between S3 Object Expiration and Lifecycle Policies:
+            Object Expiration: Automatically deletes objects after a specified period 
+                       Use Case: Delete logs after 30 days
+            Lifecycle Policies: Moves objects between storage classes or deletes them
+                       Use Case: Move objects to Glacier after 90 days and delete after 1 year
+### 62. What is S3 Intelligent-Tiering and when should you use it:
+             S3 Intelligent-Tiering automatically moves objects between frequent and infrequent access tiers to optimize costs
+### 63. How do S3 Requester Pays Buckets work:
+             Normally, the bucket owner pays for storage and data transfer. With Requester Pays, the user downloading the object covers the cost.
+### 64. What is the maximum object size allowed in S3:
+             5TB per object
+             For objects larger than 5GB, use Multipart Upload for better performance
+### 65. What are the different types of S3 Encryption:
+             SSE-S3: Amazon-managed AES-256 encryption
+             SSE-KMS: AWS KMS-managed keys for more control
+             SSE-C: Customer-managed keys
+             Client-Side Encryption: Data is encrypted before uploading to S3
+### 66. How does S3 Object Tagging work:
+             Assigns key-value pairs to objects for metadata and categorization
+             Helps in access control, cost allocation, and lifecycle rules
+### 67. How does S3 Transfer Acceleration work:
+             S3 Transfer Acceleration speeds up data uploads using AWS Edge Locations and Amazon CloudFront
+### 68. What are S3 Multi-Region Access Points:
+             They provide global endpoints to access buckets across multiple regions for faster performance and resilience
+### 69. What is AWS Lambda, and how does it work:
+             AWS Lambda is a serverless computing service that runs code in response to events. You upload code, configure triggers (such as API Gateway, S3, DynamoDB, etc.), and AWS Lambda automatically executes the function when triggered, managing infrastructure, scaling, and billing based on execution time.
+### 70. What are the key benefits of using AWS Lambda:
+             No server management – Fully managed by AWS.
+             Auto-scaling – Scales automatically based on demand.
+             Cost-effective – Pay only for execution time (no idle cost).
+             Event-driven – Can be triggered by multiple AWS services.
+             Supports multiple languages – Python, Node.js, Java, Go, Ruby, .NET, etc
+### 71. What are the supported programming languages in AWS Lambda:
+              AWS Lambda supports: Node.js, Python, Java, Go, Ruby, .NET (C#), PowerShell
+### 72. How does AWS Lambda pricing work:
+              AWS Lambda charges are based on:
+                          Number of requests – First 1M requests are free; after that, $0.20 per million requests
+                          Execution time – Charged per millisecond based on memory and duration
+                          Provisioned Concurrency (if used) – Extra charges apply
+### 73. What is the maximum execution timeout for an AWS Lambda function:
+              The maximum execution timeout for AWS Lambda is 15 minutes (900 seconds)
+### 74. What is the maximum memory allocation for a Lambda function:
+              Memory allocation ranges from 128MB to 10GB in increments of 1MB
+### 75. How does AWS Lambda scale automatically:
+              AWS Lambda scales horizontally by running multiple instances of a function concurrently. Each request triggers a new instance if needed, up to the concurrency limit
