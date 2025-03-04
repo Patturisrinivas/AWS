@@ -298,3 +298,151 @@
              Lambda can scale nearly instantly, handling thousands of concurrent executions by launching additional instances as needed.
              However, it has concurrency limits (1,000 per region by default) and burst limits (500-3,000 instances initially, then 500 per minute). If the limit is reached, requests may be throttled.
              Lambda also optimizes execution by reusing warm instances when possible to reduce cold start delays. Scaling behavior varies based on the event source; for example, API Gateway scales per request, while SQS-based invocations scale based on batch size
+## DAY7
+### 76. What is an execution environment in AWS Lambda:
+            An execution environment is an isolated container where AWS Lambda runs functions, containing the runtime, dependencies, and environment variables.
+### 77. What are cold starts in AWS Lambda? How can you reduce them:
+            A cold start occurs when AWS Lambda initializes a new execution environment, increasing response time.
+            To reduce cold starts:
+                        Use Provisioned Concurrency
+                        Optimize function size
+                        Keep the function warm using scheduled invocations
+                        Use lightweight runtimes like Node.js or Python
+### 78. Cold Starts vs. Warm Starts:
+            Cold Start: If no existing instance is available, Lambda initializes a new one, which may cause a slight delay (100ms to a few seconds).
+            Warm Start: If an instance is already running and available, it reuses it, reducing latency.
+### 79. What triggers can invoke an AWS Lambda function:
+            AWS Lambda can be triggered by:
+            Storage & Data Triggers – Lambda can respond to events from services like S3 (object creation/deletion) and DynamoDB Streams (data changes)
+            Messaging & Streaming – It can be invoked by SNS (notifications), SQS (queue messages), and Kinesis Streams (real-time data processing).
+            API & HTTP Requests – Lambda can be triggered via API Gateway, Application Load Balancer (ALB), and AWS App Runner.
+            Scheduled & Event-Based Triggers – Using EventBridge (CloudWatch Events), Lambda can run on a schedule or respond to AWS service changes.
+            Security & Management Triggers – Services like AWS Config, Systems Manager, and Secrets Manager can invoke Lambda for compliance and automation tasks.
+            Direct Invocation – Lambda can be called manually via the AWS CLI, SDKs, or even by another Lambda function.
+            
+            The choice of trigger depends on the use case—whether it's processing data, handling API requests, automating workflows, or responding to real-time events
+### 80. How would you design a highly available and scalable image processing system using AWS Lambda:
+            Scenario: You need to build an image-processing service where users upload images, and AWS Lambda processes them for resizing, watermarking, and storage
+             Architecture:
+                        User Uploads Image → S3 Bucket
+                        S3 Triggers AWS Lambda
+                        Lambda Resizes & Adds Watermark
+                        Processed Image Stored in Another S3 Bucket
+                        SNS Notification or API Gateway Response
+             Optimization Considerations:
+                        Concurrency Control: Use SQS to avoid throttling issues.
+                        Cold Start Optimization: Use Provisioned Concurrency.
+                        Error Handling: Configure DLQ (Dead Letter Queue) for failures.
+                        Logging & Monitoring: Use CloudWatch & AWS X-Ray for debugging.
+### 81. How would you handle large payloads in AWS Lambda:
+            Scenario: Your Lambda function needs to process large files (e.g., 1GB CSV data) from an S3 bucket, but the function has a 6MB payload limit.
+                        1) Break Large Files into Smaller Chunks
+                           Use AWS Glue or AWS Batch instead of Lambda for large processing jobs.
+                           Use S3 multipart uploads and S3 Select to process only necessary parts.
+                        2) Use S3 to Store Large Payloads & Pass Only References
+                           Instead of sending large payloads via API Gateway, store files in S3 and send a reference (URL).
+                        3) Leverage Step Functions for Parallel Processing
+                           Use AWS Step Functions to divide processing into multiple parallel Lambda executions.
+### 82. How would you optimize the cold start time of a high-traffic AWS Lambda function:
+            Scenario: Your Lambda function experiences slow response times due to frequent cold starts
+                        Optimization Strategies:
+                                    Use Provisioned Concurrency – Keeps function instances warm.
+                                    Choose a Lightweight Runtime – Node.js/Python have faster startup times than Java/.NET.
+                                    Keep Dependencies Minimal – Use Lambda Layers for shared libraries.
+                                    Reduce Package Size – Avoid unnecessary dependencies.
+                                    Enable SnapStart (for Java functions) – Restores pre-warmed execution environments.
+### 83. How do you deploy an AWS Lambda function:
+            There are multiple ways to deploy an AWS Lambda function, depending on automation needs and deployment strategy. The key methods include:
+                        AWS Management Console – You can manually upload the code as a ZIP file or use the inline editor for small scripts.
+                        AWS CLI & SDKs – Using commands like aws lambda create-function or update-function-code, we can deploy Lambda programmatically.
+                        Infrastructure as Code (IaC) –
+                        AWS CloudFormation – Defines Lambda deployment using YAML/JSON templates.
+                        Terraform – Automates Lambda deployment using HCL scripts.
+                        AWS SAM (Serverless Application Model) – Simplifies deployment by defining functions, API Gateway, and event sources in a single template.
+                        Serverless Framework – Helps deploy and manage Lambda with simple configurations.
+                        CI/CD Pipelines (Automated Deployment) – Lambda can be deployed via AWS CodePipeline, GitHub Actions, Jenkins, or GitLab CI/CD, often integrating with AWS CodeBuild.
+                        Containerized Deployment – Lambda supports container images (up to 10GB), deployable via Amazon ECR (Elastic Container Registry).
+                        
+            The choice of deployment method depends on the use case. For quick updates, CLI or console works; for automated deployments, IaC and CI/CD pipelines ensure scalability and consistency.
+### 84. What are environment variables in AWS Lambda:
+            Environment variables store configuration settings (e.g., API keys, database URLs) that Lambda functions can access at runtime. They are encrypted using AWS KMS
+### 85. What is AWS Lambda Layers? How do they help:
+            AWS Lambda Layers is a feature that allows you to package and share reusable code, dependencies, or libraries separately from your main function code. Instead of bundling everything into a single deployment package, you can create layers and attach them to multiple Lambda functions.
+            How They Help:
+                        Reusability – Common dependencies (e.g., SDKs, libraries) can be shared across multiple functions.
+                        Smaller Deployment Packages – Reduces function size, improving deployment speed.
+                        Easier Updates & Maintenance – Update a layer without modifying every function using it.
+                        Security & Versioning – Layers support versioning, making it easy to roll back or upgrade.
+               For example, in a DevOps environment, we often use layers to package monitoring agents like Datadog, custom business logic, or Python libraries (e.g., NumPy, Pandas) to avoid bloating each function’s package. This makes deployments more efficient and scalable.
+### 86. How do you monitor AWS Lambda performance:
+            Monitoring AWS Lambda performance is essential to ensure efficiency, optimize execution, and troubleshoot issues. AWS provides several built-in tools for this:
+                         1. AWS CloudWatch Metrics
+                                    Tracks key performance indicators like:
+                                    Invocation Count – Number of times the function is called.
+                                    Duration – Execution time of the function.
+                                    Errors & Throttles – Tracks failed invocations and rate limits.
+                                    Concurrent Executions – Helps manage scaling limits.
+                        2. AWS CloudWatch Logs
+                                    Captures function logs for debugging and analysis.
+                                    Can be used with AWS Insights to identify slow-running functions.
+                        3. AWS X-Ray (Tracing & Debugging)
+                                    Helps trace end-to-end request flow to analyze bottlenecks.
+                                    Provides visual maps of execution paths for troubleshooting.
+                        4. Custom Monitoring & Alerts
+                                    CloudWatch Alarms – Set alerts for anomalies (e.g., high error rate, long execution times).
+                                    Third-Party Tools – Use Datadog, New Relic, or AWS Lambda Powertools for advanced monitoring.
+                        5. Optimizing Performance Based on Metrics
+                                    Reduce Cold Starts – Use provisioned concurrency to keep functions warm.
+                                    Optimize Memory & CPU – Adjust memory allocation to improve execution time.
+                                    Monitor & Tune Timeouts – Avoid unnecessary function execution delays.
+                        In a DevOps environment, we integrate Lambda monitoring into CI/CD pipelines and use dashboards for real-time insights, ensuring performance optimization and cost efficiency.
+### 87. How can you optimize the performance of an AWS Lambda function:
+            Right-Sizing Memory & CPU:
+                        AWS Lambda allocates CPU power proportionally to memory. Increasing memory can also improve execution time since it provides more CPU power
+                        Use AWS Lambda Power Tuning to find the optimal memory-to-performance ratio
+            Minimizing Cold Starts:
+                        Cold starts happen when a function is invoked after being idle. To reduce them:
+                        Use Provisioned Concurrency to keep function instances warm.
+                        Choose smaller deployment package sizes by reducing dependencies.
+                        Use lighter runtime environments (e.g., prefer Python over Java if cold start time is critical).
+            Optimizing Dependencies:
+                        Minimize package size by using Lambda layers for shared dependencies.
+                        Remove unused dependencies and use compiled binaries if applicable.
+            Reducing Execution Time:
+                        Optimize code for efficiency (e.g., avoid unnecessary loops, choose efficient data structures).
+                        Use async processing where possible (e.g., SNS, SQS, EventBridge).
+            Efficient Networking & API Calls:
+                        Reduce the number of network calls and use connection pooling when calling databases.
+                        Use Amazon RDS Proxy to optimize database connections.
+                        Cache frequent responses using AWS Lambda with Amazon ElastiCache or DynamoDB DAX.
+            Monitoring & Profiling:
+                        Use AWS X-Ray to analyze performance bottlenecks.
+                        Leverage CloudWatch Logs and Metrics to track execution time and optimize accordingly.
+            To optimize an AWS Lambda function, I focus on reducing execution time and minimizing cold starts. One of the first things I check is memory allocation—since AWS allocates CPU power based on memory, increasing it slightly can often improve performance. I also use tools like AWS Lambda Power Tuning to find the best balance.
+            Another key factor is cold starts. If the function is latency-sensitive, I use Provisioned Concurrency to keep instances warm. In one of my previous projects, we had a Lambda function handling real-time API requests. Initially, cold starts were causing delays, so we implemented Provisioned Concurrency and reduced the deployment package size, cutting response time by 50%.
+            Other optimizations I apply include using connection pooling for database interactions (like Amazon RDS Proxy), caching frequently accessed data with DynamoDB DAX, and monitoring performance with AWS X-Ray and CloudWatch. These steps collectively enhance Lambda performance and ensure cost efficiency
+### 88. What is AWS Lambda@Edge, and how does it differ from regular Lambda:
+            AWS Lambda@Edge is a serverless computing service that runs functions closer to users at AWS Edge locations, rather than in a specific AWS region. It integrates with Amazon CloudFront to customize content delivery, reduce latency, and improve performance."
+            The key difference from regular AWS Lambda is that Lambda@Edge is globally distributed, whereas regular Lambda runs in a designated AWS region. It’s mainly used for optimizing web applications by modifying HTTP requests and responses in real time. For example, you can use Lambda@Edge to rewrite URLs, implement security headers, or personalize content dynamically based on user location.
+            In one of my projects, we used Lambda@Edge to dynamically redirect users to region-specific websites based on their geolocation, reducing page load times and improving user experience. This wouldn’t have been as efficient with a standard Lambda function because it runs in a fixed region.
+### 89. Can AWS Lambda functions run inside a VPC? If so, how do you configure it:
+            Yes, configure VPC settings to allow Lambda to access RDS, Redis, or private resources.
+### 90. How do you handle errors in AWS Lambda:
+            In AWS Lambda, error handling is crucial to ensure reliability and proper execution of functions. I typically handle errors using a combination of built-in AWS features and best practices, such as retries, dead-letter queues (DLQs), and structured logging.
+            Key error-handling strategies:
+                        Built-in Retries:
+                                    AWS automatically retries failed executions for asynchronous invocations (e.g., S3, SNS) twice.
+                                    For synchronous invocations (e.g., API Gateway), retries must be managed at the caller level.
+                        Dead-Letter Queues (DLQs):
+                                    For asynchronous invocations, I configure an SQS queue or SNS topic as a DLQ to capture failed events for later analysis.
+                        Lambda Destinations:
+                                    Instead of DLQs, I use Lambda Destinations to route failed requests to SQS, SNS, or another Lambda function for processing.
+                        Structured Logging & Monitoring:
+                                    I enable AWS CloudWatch Logs to track errors and use AWS X-Ray for tracing execution issues.
+                                    Implementing structured logging with JSON formatting makes it easier to analyze logs.
+                        Custom Exception Handling in Code:
+                                    I wrap function logic in try-except blocks (Python) or try-catch (Node.js, Java) to handle known failure scenarios gracefully.
+                                    I return custom error messages for better debugging and avoid exposing sensitive information.
+                        Circuit Breaker Pattern (Advanced Scenarios):
+                                    For functions interacting with external services, I implement a circuit breaker pattern to temporarily stop calls if failures exceed a threshold, preventing cascading failures.
+                        For instance, in a project where we processed real-time events using AWS Lambda and SQS, we encountered occasional processing failures. To handle this, we configured a DLQ to capture failed messages and used CloudWatch alarms to notify us when errors exceeded a threshold. This helped us identify issues quickly and retry only the failed events, ensuring smooth processing
