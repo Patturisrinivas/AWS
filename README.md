@@ -188,6 +188,20 @@
 ## DAY5
 ### 46. How do you handle duplicate event notifications:
            Implement idempotency in Lambda functions to process events only once
+           Duplicate event notifications in AWS can occur due to the at-least-once delivery guarantee of services like SNS, SQS, and EventBridge. To handle duplicates effectively, I use idempotency, deduplication mechanisms, and state tracking to ensure events are processed only once.
+           In a project where we processed order events from an SQS queue, we noticed occasional duplicate messages. To resolve this, we used an SQS FIFO queue with MessageDeduplicationId, ensuring that duplicate messages within a 5-minute window were automatically discarded. Additionally, we implemented DynamoDB conditional writes to check if an order ID already existed before processing it, ensuring complete idempotency.
+          Idempotency:
+                    I design Lambda functions to produce the same result even if the event is processed multiple times.
+                    For example, in DynamoDB, I use conditional writes (e.g., attribute_not_exists(id)) to ensure an item is inserted only if it doesn't already exist.
+          Deduplication with Message Attributes (SQS FIFO Queues):
+                    If using Amazon SQS FIFO queues, I take advantage of the MessageDeduplicationId to ensure duplicate messages within a 5-minute window are ignored.
+          Event Deduplication Using External Storage:
+                    I use DynamoDB or ElastiCache (Redis) to store event IDs and check if an event has already been processed before proceeding.
+                    TTL (Time-to-Live) in Redis helps maintain a temporary cache of processed event IDs.
+          Using AWS Lambda Destinations & SQS DLQ:
+                    If events are processed asynchronously, I configure Lambda Destinations or an SQS Dead-Letter Queue (DLQ) to track duplicate or failed events and analyze patterns.
+          De-duplication via Business Logic:
+                    Instead of relying solely on AWS mechanisms, I sometimes implement deduplication at the application level by tracking the state of an operation (e.g., checking if a transaction has already been processed before proceeding).
 ### 47. What are S3 Access Points:
            S3 Access Points provide a customized way to manage access to S3 buckets by allowing you to create dedicated endpoints with specific permissions for different               applications, teams, or workloads. 
            Instead of managing bucket-wide policies, you can create multiple access points, each with its own access policy, simplifying access control in large-scale                  environments.
@@ -246,6 +260,13 @@
             IAM Policy: Allow an IAM user to list all S3 buckets in the account.
 ### 59. What is S3 Pre-Signed URL and how does it work:
              A Pre-Signed URL allows temporary, secure access to private S3 objects without making them public
+             An S3 Pre-Signed URL is a time-limited, secure URL that allows temporary access to an S3 object without requiring direct AWS credentials. It is commonly used to grant users controlled access to private S3 objects for actions like uploading or downloading files
+             A Pre-Signed URL is generated using an IAM user’s or role’s credentials and includes a cryptographic signature. The URL contains:
+                    Bucket name & object key – Specifies the file location.
+                    HTTP method (GET, PUT, etc.) – Defines the allowed action (upload/download).
+                    Expiration time – Determines how long the URL remains valid.
+                    Signature – Ensures the request is authenticated.
+              Once generated, the user can access the object without needing AWS credentials, as long as the URL is valid
 ### 60. How does Amazon S3 handle eventual consistency:
              **Strong Consistency**: Any newly created or updated objects are immediately available
              **Eventual Consistency**: Previously, there was a delay in propagating deletes and overwrites across AZs, but AWS now offers strong read-after-write consistency for all operations
