@@ -548,3 +548,111 @@
             **Amazon SNS** is a fully managed pub/sub (publish/subscribe) messaging service that enables message broadcasting. SNS allows one-to-many message delivery, meaning you can publish a single message and have it delivered to multiple endpoints (like email, SMS, SQS queues, or Lambda functions). Lambda can be subscribed to an SNS topic, and it will automatically execute the function when a new message is published to the topic.
             In summary, SNS is typically used for pub/sub messaging, where one publisher sends messages to multiple subscribers, while SQS is used for queue-based messaging for decoupling and managing message processing. Lambda can then be used as the compute layer to process messages from either SNS or SQS.
             The three services are often combined in event-driven architectures: you can have SNS publish events, SQS queues store messages for Lambda to process, and Lambda handles the business logic asynchronously.
+## DAY9
+### 106. AWS Lambda vs. AWS Glue – Which one should you use:
+            It really depends on the use case because both services serve different purposes, even though they might seem similar at first glance.
+          **AWS Lambda** is best when we need event-driven, serverless compute power to run lightweight scripts or automation. For example, if I need to trigger a function whenever a new file lands in an S3 bucket, perform some quick processing, and store the result in DynamoDB, Lambda is a great choice. It’s cost-effective because we only pay for the execution time, and it scales automatically.
+          **AWS Glue**, on the other hand, is more suited for data transformation and ETL (Extract, Transform, Load) workflows. It’s a managed service specifically designed for processing large datasets efficiently, especially when dealing with structured or semi-structured data. If I’m working with big data—like transforming terabytes of raw log files into a structured format for analytics—Glue would be my go-to because it has built-in data cataloging, supports Apache Spark, and integrates well with AWS analytics services.
+          So, to sum it up: If I need quick event-driven functions for real-time tasks, I’ll go with Lambda. If I’m handling large-scale ETL operations that require heavy lifting, AWS Glue is the better option.
+### 107. AWS Lambda vs. EventBridge – How are they different:
+            AWS Lambda and EventBridge serve different roles in an event-driven architecture, but they often work together.
+            **AWS Lambda** is a serverless compute service that runs code in response to events. It’s great when I need to execute custom business logic based on triggers like an S3 file upload, a change in DynamoDB, or an API Gateway request. Lambda is responsible for processing the event, performing transformations, and integrating with other AWS services. 
+            **EventBridge**, on the other hand, is an event bus that helps route events between AWS services, third-party SaaS applications, and custom applications. It acts as a central hub for event-driven workflows. Instead of writing custom polling mechanisms or manually triggering functions, I can set up rules in EventBridge to listen for specific events and automatically send them to various targets—including Lambda, Step Functions, SNS, and more.
+            A simple analogy:
+                        EventBridge is like a dispatcher that listens for events and routes them to the right destination.
+                        Lambda is like a worker that takes an event and processes it according to the required logic.
+                        For example, if an application needs to process customer orders:
+            EventBridge can capture events like "New Order Placed" and route them to different services.
+            Lambda can take that event, process the order details, update inventory, and send a confirmation email.
+            So, if I need to run a function when an event occurs, I’d use Lambda. But if I need to build a loosely coupled event-driven system where multiple services respond dynamically, EventBridge is the better choice.
+
+### 108. AWS Lambda vs. AWS App Runner – When should you use each:
+            AWS Lambda and AWS App Runner both offer serverless computing, but they are designed for different types of workloads.
+            **AWS Lambda** is best when I need to run short-lived, event-driven functions without managing servers. It’s great for things like processing S3 uploads, handling API requests, transforming data streams, or automating workflows. Since Lambda has a max execution time of 15 minutes, it’s ideal for lightweight, quick-running tasks rather than long-running applications.
+            **AWS App Runner**, on the other hand, is better suited for deploying full-fledged web applications and containerized services without worrying about infrastructure management. If I have a containerized application—let’s say a Flask or Node.js app—that needs to be continuously running and handling HTTP requests, I’d go with App Runner. It automatically scales based on traffic and supports long-running workloads, which Lambda isn’t designed for.
+            A simple way to think about it:
+            Lambda is for running functions on demand in response to events.
+            App Runner is for running containerized applications and APIs continuously.
+            For example, if I need to process images uploaded to an S3 bucket, Lambda is the better choice since it runs only when needed. But if I’m deploying a backend service that needs to stay up 24/7 and scale automatically with traffic, I’d go with App Runner.
+            So, if the workload is event-driven and stateless, I’d use Lambda. If it’s a long-running, containerized web service, App Runner is the better fit
+### 109. AWS Lambda vs. AWS Lightsail – What’s the difference:
+            AWS Lambda and AWS Lightsail are both cloud computing services, but they serve very different purposes.
+            **AWS Lambda** is a serverless compute service designed for event-driven workloads. It’s ideal for running small, stateless functions in response to events like API requests, database updates, or file uploads. Lambda automatically scales and only charges for the time the code is executing, making it highly cost-efficient for intermittent workloads.
+            **AWS Lightsail**, on the other hand, is more like a simplified VPS (Virtual Private Server) solution. It provides pre-configured virtual machines, databases, and networking for hosting websites, applications, and small business workloads. Lightsail is a good choice when I need a traditional server environment with predictable pricing, but I don’t want the complexity of configuring EC2 instances and networking from scratch.    
+            A simple analogy:
+            Lambda is like a light switch that turns on only when needed and shuts off when done, making it cost-efficient for short, event-driven tasks.
+            Lightsail is like renting an apartment—it’s always running, offering a fixed-price server environment for web hosting, databases, or applications.
+            For example, if I need to run an occasional background job that processes data from an S3 bucket, Lambda is the better choice. But if I want to host a WordPress website or a small web application that runs continuously, Lightsail is the way to go.
+            So, if I need an event-driven, fully managed compute service, I’d choose Lambda. But if I need a simple, always-on VPS-like server for hosting or long-running applications, Lightsail is the better fit.
+### 110. How do you ensure secure API communication between AWS Lambda and third-party APIs:
+            When I integrate AWS Lambda with a third-party API, security is always a top priority. One of the first things I do is make sure that sensitive information, like API keys or OAuth tokens, is never hardcoded. Instead, I store them securely in AWS Secrets Manager or Parameter Store, which allows Lambda to retrieve them only when needed.
+            Another key aspect is ensuring that all communication happens over HTTPS. This prevents any unauthorized interception of data in transit. If the API requires authentication, I use secure methods like OAuth or signed requests, depending on what the API supports.
+            I also make sure that my Lambda function has the minimum necessary permissions using IAM roles—just enough access to do its job, nothing more. This way, even if something goes wrong, the impact is minimized.
+            For reliability, I implement retry logic with exponential backoff to handle transient failures and avoid hitting API rate limits. I also log API interactions using CloudWatch and sometimes enable X-Ray for tracing to monitor performance and troubleshoot issues.
+            A real-world example would be integrating Lambda with a payment gateway like Stripe or PayPal. I’d store the API credentials securely, use HTTPS for calls, validate responses to prevent injection attacks, and log all transactions for auditing.
+            So overall, security is a mix of secure credential storage, encrypted communication, proper authentication, IAM restrictions, and monitoring. By applying these best practices, I ensure that Lambda communicates with third-party APIs in a safe and efficient manner.
+### 111. How do you prevent AWS Lambda from being overwhelmed by a sudden spike in traffic:
+            AWS Lambda is designed to scale automatically, but a sudden spike in traffic can still cause issues if not handled properly. When I expect unpredictable traffic patterns, I take a few key measures to prevent Lambda from being overwhelmed.
+            First, I set up concurrency limits using Reserved Concurrency. This ensures that my function doesn’t scale beyond a certain number of instances, which is important if it interacts with downstream services like databases that have their own capacity limits. For example, if my Lambda is writing to an RDS database, I’d limit concurrency to prevent too many connections from overwhelming the database.
+            For high-throughput applications, I use Provisioned Concurrency, which keeps a set number of Lambda instances warm and ready to handle bursts of traffic without cold starts. This is useful for latency-sensitive applications, like an API backend handling thousands of requests per second.
+            If my Lambda is consuming events from an SQS queue, I enable SQS message batching and DLQs (Dead Letter Queues) to handle sudden spikes gracefully. This way, if there’s a backlog of events, Lambda processes them at a controlled rate instead of trying to handle everything at once.
+            For API Gateway-based workloads, I configure throttling rules to control the request rate and avoid exhausting Lambda’s concurrency. If I need more resilience, I integrate AWS Step Functions to break down complex workflows into smaller, manageable steps instead of overloading Lambda with heavy processing tasks.
+            And of course, I monitor everything using CloudWatch Metrics and Alarms to detect sudden spikes early and scale other parts of my system accordingly.
+            So in short, I prevent Lambda from being overwhelmed by using concurrency controls, queue-based processing, API throttling, and proactive monitoring—all while ensuring that downstream systems don’t become bottlenecks.
+### 112. How would you implement a real-time serverless data pipeline using AWS Lambda:
+            To build a real-time serverless data pipeline using AWS Lambda, I would design an event-driven architecture that processes and analyzes incoming data as soon as it arrives. Let me walk you through a typical implementation using AWS services:
+            1. Data Ingestion
+            The pipeline starts with a real-time data source. Depending on the use case, this could be:
+                        Amazon Kinesis Data Streams for high-throughput event streaming (e.g., IoT data, application logs).
+                        Amazon S3 for batch-based real-time processing (e.g., log files, image uploads).
+                        Amazon API Gateway for real-time API event ingestion.
+                        Lambda is configured as an event trigger for these sources to process data as soon as it arrives.
+            2. Data Processing with AWS Lambda
+            Once an event is received, Lambda acts as the processing engine, transforming or enriching the data. For example:
+                        If it's IoT sensor data from Kinesis, Lambda can parse and filter important metrics before sending them downstream.
+                        If it's an image uploaded to S3, Lambda can invoke Amazon Rekognition to analyze it in real-time.
+                        If it's log data, Lambda can extract key insights and push structured results to a database.
+            3. Storing Processed Data
+            After processing, the transformed data needs to be stored for further analysis. Common destinations include:
+                        Amazon DynamoDB for structured key-value storage with low-latency querying.
+                        Amazon OpenSearch Service for real-time search and analytics.
+                        Amazon S3 or Redshift for long-term storage and deeper analysis.
+            4. Real-time Notifications & Analytics
+            If immediate action is required, Lambda can trigger:
+                        Amazon SNS or Amazon SQS to notify users or systems.
+                        AWS Step Functions for orchestrating further processing.
+                        Amazon QuickSight or OpenSearch Dashboards for visualization.
+            5. Monitoring and Scaling
+            To ensure reliability and performance, I would:
+                        Use CloudWatch Logs & Metrics to monitor execution time and errors.
+                        Configure Dead Letter Queues (DLQs) to capture failed messages.
+                        Use Auto-scaling with Kinesis and SQS to handle varying loads efficiently.
+            Example Use Case:
+            For a real-time fraud detection system, I could use:
+                        API Gateway to receive transaction data.
+                        Lambda to analyze transaction patterns.
+                        DynamoDB to store transaction history.
+                        SNS to alert on suspicious activity instantly.
+            This approach ensures a fully serverless, scalable, and real-time data pipeline with minimal operational overhead. By leveraging AWS Lambda along with event-driven services like Kinesis, S3, and DynamoDB, I can process data in milliseconds without managing servers.
+### 113. How would you debug AWS Lambda failures in a production environment:
+            Debugging AWS Lambda failures in production is always an interesting challenge because it’s often a mix of logs, metrics, and a bit of intuition. First, I’d start with CloudWatch Logs—that’s usually my go-to. I’d check the logs for any specific error messages or stack traces. If it’s a timeout or memory issue, the logs usually give a pretty good clue.
+            Now, if the logs don’t tell me the whole story, I’d move on to CloudWatch Metrics. I’d check things like invocation count, duration, and error count. If I see an increase in errors or a spike in duration, that might indicate the function is hitting a timeout or there’s an external dependency slowing it down.
+            If it’s an issue with an upstream or downstream service, I’d check AWS X-Ray. This is super helpful when debugging API Gateway or DynamoDB-related issues. If the function is waiting too long for a response, X-Ray will show me where the delay is happening.
+            Then, there’s DLQs (Dead Letter Queues). If the Lambda is triggered by SQS or SNS and keeps failing, I’d check if the messages are landing in a DLQ. That usually means there’s some unhandled exception or retry issue.
+            If none of these immediately solve the issue, I’d consider adding more logging—maybe structured logging with request IDs so I can correlate failures across services. Also, if the function is interacting with third-party APIs, I’d check rate limits and authentication issues.
+            And of course, if it’s happening across multiple functions, I’d step back and check IAM permissions, VPC configurations, or even deployment rollbacks.
+            So yeah, debugging Lambda in production is all about logs, metrics, tracing, and sometimes a little detective work. I always like to take a systematic approach—start with logs, move to metrics, then tracing, and finally check infrastructure issues
+### 114. How would you implement blue-green deployment for AWS Lambda:
+            So, blue-green deployment for AWS Lambda is all about minimizing downtime and risk when deploying new versions. Since Lambda is versioned natively, I’d take advantage of aliasing to handle the traffic shifting seamlessly. Here’s how I’d do it in production:
+            First, I’d deploy the new Lambda version alongside the existing one. In Lambda, each deployment creates a new version, so I don’t overwrite the current production code. Instead, I’d use a Lambda alias—let’s say ‘Prod’—which initially points to the existing stable version (let’s call it v1).
+            Once the new version (v2) is deployed, I’d update the alias to shift only a small percentage of traffic—maybe 10%—to v2 while keeping 90% on v1. This can be done using AWS Lambda’s weighted alias feature. Then, I’d monitor CloudWatch logs and metrics, checking for errors, latency, and any unexpected spikes in throttles. If everything looks good, I’d gradually increase the traffic to v2 until it reaches 100%.
+            If something goes wrong at any stage, the rollback is instant—I just point the alias back to v1. That’s the beauty of blue-green with Lambda; there’s no waiting for instances to drain connections like with EC2.
+            For extra safety, I’d also integrate this with AWS CodeDeploy’s Canary or Linear deployment strategies, so the traffic shift is automated and gradual. This ensures that if any issues arise, CodeDeploy can automatically roll back without manual intervention.
+            So, in short—Lambda’s aliasing and versioning make blue-green deployments smooth and risk-free, and with a mix of weighted traffic shifting, monitoring, and rollback mechanisms, we can deploy confidently with minimal impact on users.
+### 115. How would you integrate AWS Lambda with an RDS database efficiently:
+            So, integrating AWS Lambda with an RDS database efficiently comes down to three key things: connection management, security, and optimizing queries. If I just let Lambda open direct database connections, I could run into connection exhaustion really fast, especially if I have a high number of concurrent executions. RDS has a finite number of connections, and Lambda can scale almost infinitely—so that’s something I have to handle carefully.
+            To solve that, I’d use Amazon RDS Proxy. This acts as a connection pooler between Lambda and RDS, which means it efficiently manages and reuses database connections rather than opening a new one every time a Lambda function runs. It also helps with failovers and authentication, which is a bonus.
+            For security, I’d avoid storing database credentials inside Lambda. Instead, I’d use IAM authentication with RDS and let Lambda assume a role that grants temporary credentials. This removes the need for hardcoded secrets and makes authentication more secure. If I do need static credentials, I’d store them in AWS Secrets Manager and retrieve them at runtime.
+            Now, when it comes to network setup, if my RDS instance is inside a VPC (which it usually is for security), my Lambda function also needs to be inside that VPC with proper security group rules. But to avoid cold start latency issues that come with VPC-enabled Lambdas, I’d ensure that my Lambda uses AWS PrivateLink or a VPC endpoint so it doesn’t need to traverse the internet.
+            For performance, I’d keep my queries optimized—things like indexing, limiting the data retrieved, and using read replicas if I have a high-read workload. If my application is read-heavy, I might even introduce Amazon ElastiCache (Redis or Memcached) as a caching layer to reduce the load on RDS.
+            So, in summary—use RDS Proxy for efficient connection pooling, IAM for secure authentication, proper VPC setup to avoid cold start delays, and caching where needed. This way, I get the best balance of security, scalability, and performance without running into connection limits or performance bottlenecks
