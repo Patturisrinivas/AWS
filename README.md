@@ -780,6 +780,7 @@
 ### 137. What are IAM permission boundaries:
             A permission boundary is an advanced IAM feature that restricts the maximum permissions a user or role can have, regardless of other attached policies. It prevents privilege escalation by ensuring users/roles cannot exceed defined access limits.
 ### 138. What is the IAM policy evaluation logic:
+          When a user or role requests access, AWS IAM evaluates policies using the following rules:
             **Explicit Deny**: If any policy explicitly denies access, the request is denied.
             **Explicit Allow**: If there is an allow statement and no explicit deny, the request is allowed.
             **Implicit Deny**: If a request is not explicitly allowed, it is denied by default.
