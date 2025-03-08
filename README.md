@@ -753,3 +753,37 @@
             For added security, if the environment variables contain sensitive information like API keys or database credentials, it’s best to use AWS Secrets Manager or AWS Systems Manager Parameter Store instead. These services store and manage secrets securely, and the Lambda function can retrieve them at runtime using fine-grained IAM permissions.
             Additionally, access to environment variables can be restricted using IAM policies to ensure only authorized functions or users can modify them. Combined with proper logging and monitoring in CloudWatch, this ensures that sensitive data remains protected.
             So, while Lambda encrypts environment variables by default, best practices involve using dedicated secret management services and applying least privilege access controls to keep them even more secure.
+## DAY11
+### 131. What is AWS IAM:
+            AWS Identity and Access Management (IAM) is a service that enables secure access control to AWS resources. It allows you to create and manage users, groups, roles, and policies to define permissions for accessing AWS services. IAM is a global service and does not require any additional costs
+### 132. What are IAM users, groups, and roles:
+            **IAM User**: A user represents an individual who needs access to AWS. Each user has unique credentials (username and password or access keys).
+            **IAM Group**: A collection of IAM users that share the same permissions. This helps manage access efficiently.
+            **IAM Role**: A role is an identity that can be assumed by trusted entities (users, applications, AWS services). Unlike users, roles do not have long-term credentials; they provide temporary permissions.
+### 133. What are IAM policies? How do they work?
+            IAM policies are JSON documents that define permissions for users, groups, or roles. A policy consists of statements that include:
+                        Effect: Either Allow or Deny access.
+                        Action: Specifies the AWS service and API action (e.g., s3:PutObject).
+                        Resource: Defines the AWS resource the policy applies to.
+                        Condition: (Optional) Adds constraints like IP addresses or MFA authentication
+### 134. What is the difference between an inline policy and a managed policy:
+            Inline Policy: A policy directly attached to a single IAM user, group, or role. These are tightly coupled with the entity
+            Managed Policy: A standalone policy that can be attached to multiple users, groups, or roles. AWS provides AWS-managed policies, while customers can create custom-managed policies
+### 135. What is an IAM role and how is it different from an IAM user:
+            An IAM user has permanent credentials (passwords or access keys) and is meant for human access.
+            An IAM role does not have long-term credentials and is assumed temporarily by AWS services, users, or applications. Roles use temporary security credentials provided by AWS Security Token Service (STS).
+### 136. How does IAM support Multi-Factor Authentication (MFA):
+            IAM allows enabling MFA for users to add an extra security layer. It requires users to provide a second factor (such as a one-time password from an MFA device) in addition to their password. AWS supports:
+                        Virtual MFA devices (e.g., Google Authenticator).
+                        Hardware MFA devices.
+                        FIDO Security Keys.
+### 137. What are IAM permission boundaries:
+            A permission boundary is an advanced IAM feature that restricts the maximum permissions a user or role can have, regardless of other attached policies. It prevents privilege escalation by ensuring users/roles cannot exceed defined access limits.
+### 138. What is the IAM policy evaluation logic:
+            **Explicit Deny**: If any policy explicitly denies access, the request is denied.
+            **Explicit Allow**: If there is an allow statement and no explicit deny, the request is allowed.
+            **Implicit Deny**: If a request is not explicitly allowed, it is denied by default.
+### 139. How does IAM integrate with AWS Organizations:
+            AWS Organizations allow centralized management of multiple AWS accounts. IAM integrates with Organizations using Service Control Policies (SCPs), which set permission guardrails for accounts within the organization. SCPs do not grant permissions but restrict the maximum permissions accounts can have.
+### 140. What is AWS IAM Identity Center (SSO), and how does it work:
+            AWS IAM Identity Center (previously AWS SSO) provides centralized access management for AWS accounts and business applications. It allows users to sign in once and access multiple AWS accounts without needing IAM users. It supports integration with Active Directory and third-party identity providers.
