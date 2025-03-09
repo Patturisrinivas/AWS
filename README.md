@@ -788,3 +788,38 @@
             AWS Organizations allow centralized management of multiple AWS accounts. IAM integrates with Organizations using Service Control Policies (SCPs), which set permission guardrails for accounts within the organization. SCPs do not grant permissions but restrict the maximum permissions accounts can have.
 ### 140. What is AWS IAM Identity Center (SSO), and how does it work:
             AWS IAM Identity Center (previously AWS SSO) provides centralized access management for AWS accounts and business applications. It allows users to sign in once and access multiple AWS accounts without needing IAM users. It supports integration with Active Directory and third-party identity providers.
+## DAY12
+### 141. What are AWS IAM session policies:
+            IAM session policies are temporary policies applied when assuming a role. They limit permissions during a session, even if the role has broader permissions. This is useful for providing least-privilege access dynamically.
+### 142. What is the difference between an IAM policy and an SCP:
+            **IAM Policy**: Grants or restricts permissions for IAM users, groups, and roles within an AWS account.
+            **Service Control Policy (SCP)**: Applies to AWS accounts within an Organization to set permission limits. SCPs do not grant permissions but define what actions are allowed at the account level
+### 143. How do IAM Roles work with EC2 instances:
+            IAM roles can be assigned to EC2 instances using Instance Profiles. This allows applications running on EC2 to access AWS services securely without needing access keys. The EC2 instance fetches temporary credentials from the instance metadata service (IMDSv2 recommended)
+### 144. How do you enforce least privilege access in AWS IAM:
+            To implement least privilege access:
+                        Assign only necessary permissions using granular policies.
+                        Use IAM roles instead of long-term access keys.
+                        Implement IAM permission boundaries.
+                        Use MFA for sensitive actions.
+                        Regularly audit permissions using AWS IAM Access Analyzer.
+### 145. How do you troubleshoot IAM access issues:
+            Check IAM Policies – Ensure the user/role has the necessary permissions.
+            Look for Explicit Denies – Any deny in a policy overrides allows.
+            Validate Resource Policies – Services like S3, KMS, and Lambda can have resource-based policies that might block access.
+            Use IAM Policy Simulator – Helps test and debug policies.
+            Verify Service Control Policies (SCPs) – If using AWS Organizations, SCPs might restrict permissions.
+### 146. Can you give an example of a scenario where you would use an IAM Role instead of an IAM User:
+            A common scenario is when an application running on an EC2 instance needs access to an S3 bucket. Instead of storing access keys in the instance, we attach an IAM Role to the EC2 instance. The application can then assume the role and retrieve temporary credentials securely.
+### 147. What happens if an IAM user is part of multiple groups with conflicting permissions:
+            IAM follows a default deny rule. If one policy allows an action and another policy denies it, the explicit Deny always takes precedence. If no explicit allow or deny is mentioned, the action is denied by default.
+### 148. Can an IAM role assume another IAM role? If yes, how:
+            Yes, IAM roles can assume other roles using the sts:AssumeRole API. This is commonly used in cross-account access scenarios where one AWS account needs temporary access to another. The role being assumed must have a trust policy allowing the first role to assume it.
+### 149. What is the difference between an IAM user policy and a resource-based policy:
+            **IAM User Policy**: Attached to IAM users, groups, or roles to define what AWS resources they can access.
+            **Resource-Based Policy**: Attached directly to AWS resources (e.g., S3 bucket, Lambda function, KMS key). They specify who can access the resource and what actions they can perform.
+### 150. What is AWS IAM Access Analyzer, and how does it work:
+            AWS IAM Access Analyzer is a tool that helps identify and analyze access to AWS resources. It:
+                        Scans policies to check if resources (e.g., S3 buckets, IAM roles) are accessible outside the account.
+                        Identifies unintended public access or overly permissive policies.
+                        Provides actionable insights for tightening security
