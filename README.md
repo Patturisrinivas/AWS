@@ -823,3 +823,40 @@
                         Scans policies to check if resources (e.g., S3 buckets, IAM roles) are accessible outside the account.
                         Identifies unintended public access or overly permissive policies.
                         Provides actionable insights for tightening security
+## DAY13
+### 151. What is the difference between AWS STS (Security Token Service) and IAM Roles:
+                        AWS STS: A service that issues temporary security credentials (valid for up to 12 hours).
+                        IAM Role: An identity that can be assumed to get temporary credentials from STS.
+            IAM roles use STS under the hood to provide temporary access to AWS services.
+### 152. How do cross-account IAM roles work:
+            To allow access between AWS accounts:
+                        The target account creates an IAM role with a trust policy allowing the source account to assume it.
+                        The source account uses sts:AssumeRole to get temporary credentials.
+                        The role grants permissions based on the attached policies.
+### 153. How do you restrict IAM access to specific IP addresses:
+            By using IAM policy conditions with the aws:SourceIp key.
+### 154. How do IAM Roles work with Lambda functions:
+            When creating an AWS Lambda function, you must assign an execution role. This IAM role grants the function permission to access AWS services like S3, DynamoDB, or CloudWatch logs. The Lambda function assumes this role when executing.
+### 155. What are IAM Service-Linked Roles:
+            IAM Service-Linked Roles are predefined roles created and managed by AWS services (e.g., AWS Config, AWS Organizations). They allow AWS services to perform actions on your behalf without requiring manual role configuration.
+### 156. What happens if an IAM user loses their MFA device:
+            The user cannot log in until MFA is disabled or reset.
+            An IAM administrator must disable or reconfigure MFA for the user.
+            Best practice: Enable multiple MFA devices or use account recovery options.
+### 157. Can IAM policies be used to control access to AWS Billing and Cost Management:
+            Yes, but AWS billing data is account-wide and requires special permissions. Users must have:
+                        aws-portal:ViewBilling to view billing information.
+                        aws-portal:ModifyBilling to change payment settings.
+### 158. What is the IAM best practice for managing access keys:
+            Avoid long-term access keys; prefer IAM roles.
+            Rotate access keys periodically.
+            Use IAM policies to restrict API access.
+            Store keys securely using AWS Secrets Manager or Parameter Store.
+### 159. Can you assign IAM permissions to a specific AWS Region:
+            Yes, IAM supports regional restrictions using condition keys
+                        "Condition": { "StringEquals": { "aws:RequestedRegion": "us-east-1" } }
+                        This ensures users can only perform actions in us-east-1.
+### 160. What are IAM session duration limits:
+            By default, IAM role sessions last one hour.
+            The maximum session duration can be extended up to 12 hours using IAM settings.
+            Temporary credentials expire automatically after the session duration ends.
