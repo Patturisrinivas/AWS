@@ -860,3 +860,70 @@
             By default, IAM role sessions last one hour.
             The maximum session duration can be extended up to 12 hours using IAM settings.
             Temporary credentials expire automatically after the session duration ends.
+## DAY14
+### 161. What is a VPC in AWS:
+          A Virtual Private Cloud (VPC) in AWS is a logically isolated network within the AWS cloud that enables users to launch AWS resources in a customized network environment. It allows complete control over networking, including IP addressing, subnets, route tables, security groups, and network ACLs. Essentially, a VPC acts as a private data center in the cloud, ensuring secure communication between resources
+### 162. What are the main components of an AWS VPC:
+          An AWS VPC consists of several essential components:
+                    Subnets – Divisions of the VPC into smaller network segments (public/private).
+                    Route Tables – Define the rules for traffic routing between subnets and external networks.
+                    Internet Gateway (IGW) – Enables communication between VPC resources and the internet.
+                    NAT Gateway/Instance – Allows private subnet instances to access the internet while keeping them private.
+                    Security Groups – Act as a virtual firewall at the instance level.
+                    Network ACLs (NACLs) – Provide an additional layer of security at the subnet level.
+                    Elastic IP (EIP) – A static IP address for instances.
+                    VPC Peering & Transit Gateway – Enables communication between VPCs.
+### 163. What is the difference between a Security Group and a Network ACL:
+          **Feature**	            **Security Group**	                                   **Network ACL**
+             Level	                        Instance-level	                                               Subnet-level
+          Stateful/Stateless	       Stateful (Automatically allows return traffic)	Stateless (Explicitly allow/deny both inbound and outbound rules)
+            Rules	                       Only allow rules	                                         Both allow and deny rules
+          Default behavior	      Denies all inbound traffic, allows all outbound traffic	Allows all inbound and outbound traffic by default
+          Evaluation order	           Evaluates all rules before deciding	                   Rules evaluated in numerical order
+     Security groups are used for fine-grained instance protection, whereas NACLs provide broader control at the subnet level.
+### 164. What is the difference between a Public and a Private Subnet:
+          Public Subnet: Contains resources that need direct access to the internet. It has a route to an Internet Gateway (IGW), allowing inbound and outbound communication over the internet.
+          Private Subnet: Hosts resources that should not have direct internet access, such as databases. It does not have a direct route to an IGW. Instead, if outbound internet access is needed, a NAT Gateway is used.
+### 165. What is a NAT Gateway, and how does it work:
+          A NAT (Network Address Translation) Gateway allows instances in a private subnet to access the internet while keeping them hidden from inbound internet connections. It enables outbound traffic but blocks unsolicited inbound traffic.
+          It works by:
+                    Receiving a request from a private instance.
+                    Replacing the private IP with its Elastic IP.
+                    Sending the request to the internet.
+                    Receiving the response and forwarding it back to the private instance.
+                    This is crucial when private instances need software updates or access to external APIs.
+### 166. How does VPC Peering work, and when would you use it:
+          VPC Peering is a networking connection between two VPCs that allows them to communicate privately using private IP addresses as if they were in the same network.
+          It is useful when:
+                    You have multiple AWS accounts and want them to share resources.
+                    You need secure communication between different departments' VPCs.
+                    You want to avoid public internet exposure while transferring data.
+                    However, VPC Peering does not support transitive routing, meaning if VPC A is peered with VPC B and B is peered with VPC C, A cannot communicate with C unless explicit peering is established.
+### 167. What is a Transit Gateway, and how is it different from VPC Peering:
+          AWS Transit Gateway is a scalable network hub that allows multiple VPCs and on-premises networks to communicate through a single gateway. Unlike VPC Peering, it supports transitive routing, simplifying complex network architectures.
+              Differences:
+                    VPC Peering is a direct connection between two VPCs (one-to-one).
+                    Transit Gateway allows many-to-many communication, acting as a central hub.
+                    It is recommended for large-scale architectures with multiple VPCs needing seamless communication.
+### 168. What are VPC Endpoints, and why are they used:
+          VPC Endpoints enable private connectivity between a VPC and AWS services without requiring the internet, VPNs, or NAT Gateways. There are two types:
+                    Interface Endpoints – Use private IPs and Elastic Network Interfaces (ENIs). Example: Connecting to AWS S3, DynamoDB, etc.
+                    Gateway Endpoints – Work at the route table level and only support S3 and DynamoDB.
+          Benefits:
+                    Eliminates the need for an Internet Gateway or NAT Gateway.
+                    Reduces data transfer costs by avoiding public internet traffic.
+                    Enhances security by keeping traffic within AWS.
+### 169. What is the difference between an Internet Gateway and an Egress-Only Internet Gateway:
+          **Internet Gateway** (IGW): Enables both inbound and outbound internet access for IPv4 traffic.
+          **Egress-Only Internet Gateway** (EIGW): Designed for IPv6 traffic, allowing only outbound communication.
+           Egress-Only IGW is used when instances in a private subnet need outbound internet access over IPv6 without exposing them to incoming connections.
+### 170. How do you secure a VPC:
+          To secure a VPC, I follow these best practices:
+                    Use Security Groups and NACLs to restrict access at different layers.
+                    Minimize public exposure by keeping critical resources in private subnets.
+                    Use VPC Endpoints to access AWS services privately.
+                    Enable VPC Flow Logs for network monitoring and auditing.
+                    Use IAM roles and policies to enforce least privilege access.
+                    Restrict outbound traffic using NAT Gateways and Firewall rules.
+                    Use AWS WAF and Shield for DDoS protection.
+                    By implementing these, we ensure secure and controlled network traffic within the VPC.
