@@ -927,3 +927,76 @@
                     Restrict outbound traffic using NAT Gateways and Firewall rules.
                     Use AWS WAF and Shield for DDoS protection.
                     By implementing these, we ensure secure and controlled network traffic within the VPC.
+## DAY15
+### 171. What is Elastic Load Balancing (ELB) in AWS:
+          AWS Elastic Load Balancing (ELB) is a managed service that automatically distributes incoming traffic across multiple targets, such as EC2 instances, containers, and IP addresses. It enhances application availability, fault tolerance, and scalability by balancing the load among multiple resources in one or more availability zones.
+          ELB provides four types of load balancers:
+                    Application Load Balancer (ALB) – Best suited for HTTP/HTTPS traffic with advanced routing features.
+                    Network Load Balancer (NLB) – Handles TCP, UDP, and TLS traffic with ultra-low latency.
+                    Gateway Load Balancer (GWLB) – Used for deploying and scaling third-party virtual appliances.
+                    Classic Load Balancer (CLB) – Legacy option that supports both HTTP/HTTPS and TCP traffic.
+### 172. What are the benefits of using AWS ELB:
+          AWS ELB provides several benefits, including:
+                    Automatic scaling – It dynamically scales to handle varying traffic loads.
+                    High availability – Ensures failover across multiple Availability Zones (AZs).
+                    Security integration – Works with AWS WAF, Shield, and ACM for enhanced security.
+                    Health checks – Automatically detects and removes unhealthy targets.
+                    SSL termination – Offloads SSL decryption to reduce application server load.
+                    Ease of management – Fully managed by AWS, eliminating the need for manual configuration.
+### 173. What are the differences between ALB, NLB, and CLB:
+          **Feature**	             **ALB (Application LB)**	                   ** NLB (Network LB)**	          ** CLB (Classic LB)**
+          **Protocol**	                      HTTP, HTTPS	                       CP, UDP, TLS	                    HTTP, HTTPS, TCP
+          **Routing**	                Layer 7 (Application)	                    Layer 4 (Transport)	                    Layer 4 & 7
+          **Performance**	                    Good for web apps	                    High-performance,                     low latency	General-purpose
+          **Use Case**	                 Web applications, microservices	       Real-time streaming, gaming, IoT	         Legacy applications
+          **SSL Termination**	                         Yes	                                        No	                              Yes
+          AWS recommends ALB for modern applications, while NLB is best for ultra-low latency and high-throughput scenarios.
+### 174. What is a Target Group in AWS Load Balancing:
+          A Target Group is a logical grouping of backend resources, such as EC2 instances, Lambda functions, or IP addresses, that receive traffic from a load balancer.
+          Each target group is associated with health checks to monitor resource availability. A load balancer routes traffic to only healthy targets within the group.
+          Example:
+          An ALB can route traffic to multiple target groups based on URL paths (/api → API servers, /images → Image servers).
+          An NLB can distribute TCP traffic among a group of EC2 instances.
+### 175. How does AWS ELB perform health checks:
+          ELB uses health checks to monitor the status of targets (EC2, Lambda, etc.). It periodically sends requests to each registered target to ensure they are healthy.
+          Health checks have the following parameters:
+                    Protocol & Port – Defines the type of request (HTTP, TCP) and port number.
+                    Healthy/Unhealthy Threshold – Number of consecutive successful/failed checks before marking a target as healthy/unhealthy.
+                    Interval – Frequency of health check requests.
+                    Timeout – How long to wait for a response before considering the check failed.
+                    If a target fails multiple health checks, it is removed from service, and traffic is rerouted to healthy instances.
+### 176. How does SSL termination work in AWS ELB:
+          SSL termination is the process of decrypting SSL/TLS traffic at the load balancer instead of the backend servers. This reduces the computational load on application servers.
+          ALB & CLB support SSL termination via AWS Certificate Manager (ACM) or manually uploaded certificates.
+          NLB does not support SSL termination; it passes encrypted traffic to backend instances.
+          Benefits:
+                    Improves application performance.
+                    Allows centralized certificate management.
+                    Enables HTTP to HTTPS redirection at the load balancer level.
+### 177. How does ALB handle host-based and path-based routing:
+          Host-Based Routing: Routes requests based on the domain name in the request header.
+                    Example: api.example.com → API servers, blog.example.com → Blog servers.
+          Path-Based Routing: Routes requests based on the URL path.
+                    Example: /api → API instances, /images → Image processing instances.
+          Both types of routing help optimize request distribution based on application requirements.
+### 178. How does Sticky Sessions work in ELB:
+          Sticky Sessions, also known as session affinity, ensure that requests from the same client are always directed to the same target for the duration of the session.
+                    ALB uses Application Cookie Stickiness (custom app cookies) and Duration-Based Stickiness (AWS-generated cookies).
+                    CLB uses Duration-Based Stickiness only.
+                    NLB does not support Sticky Sessions.
+          Use Case: Useful for applications that maintain user sessions in-memory, such as shopping carts.
+### 179. What are Cross-Zone Load Balancing and its benefits:
+           Cross-Zone Load Balancing allows an AWS Load Balancer to evenly distribute traffic across all instances in all AZs, instead of restricting traffic within a single AZ.
+          Benefits:
+                    Ensures balanced workload distribution across all instances.
+                    Prevents uneven traffic distribution due to instance scaling differences.
+                    Reduces the impact of an overloaded AZ.
+                    ALB & CLB: Always enabled, free of cost.
+                    NLB: Disabled by default, but can be enabled (incurs charges).
+### 180. How do you secure an AWS Load Balancer:
+          Use HTTPS (SSL/TLS) for encrypted communication.
+          Implement AWS WAF to protect against common web attacks.
+          Restrict access with Security Groups and NACLs.
+          Enable Access Logging for monitoring requests.
+          Use AWS Shield for DDoS protection.
+          Leverage IAM roles and policies for restricted access.
