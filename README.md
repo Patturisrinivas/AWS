@@ -1000,3 +1000,81 @@
           Enable Access Logging for monitoring requests.
           Use AWS Shield for DDoS protection.
           Leverage IAM roles and policies for restricted access.
+## DAY16
+### 181. How does Load Balancer handle sudden traffic spikes:
+          AWS Load Balancers are designed to automatically scale to handle sudden traffic increases. However, the scaling speed depends on the load balancer type:
+                    ALB: Uses a warm-up mechanism; scaling can take a few minutes.
+                    NLB: Scales almost instantly due to its static IP nature.
+                    CLB: Slower to scale compared to ALB and NLB.
+          To handle traffic spikes effectively:
+                    Use AWS Auto Scaling with EC2 instances.
+                    Pre-warm the load balancer if expecting a high traffic event (for CLB).
+                    Leverage AWS Global Accelerator for faster routing.
+### 182. Can an ALB/NLB forward requests to multiple AWS accounts:
+          Yes, ALB and NLB support cross-account target groups, which means they can route traffic to instances in different AWS accounts.
+                    Helps in multi-account architectures.
+                    Requires IAM permissions and resource sharing via AWS Resource Access Manager (RAM).
+                    Security groups and IAM policies must be configured carefully to prevent unauthorized access.
+### 183. What happens if all targets in a target group become unhealthy:
+          If all targets in a target group fail health checks, the ELB stops routing traffic, causing application downtime. To prevent this:
+                    Use Auto Scaling to replace unhealthy instances.
+                    Configure multiple target groups across different Availability Zones.
+                    Ensure proper grace periods for newly launched instances.
+                    Implement failover mechanisms, such as Route 53 health checks.
+### 184. How do you route traffic to an on-premises data center using AWS Load Balancer:
+          To route traffic to an on-premises data center, you can:
+                    Use NLB with IP targets, where on-prem servers are registered as IPs.
+                    Use ALB with AWS Direct Connect or VPN to reach on-prem resources.
+          Limitations:
+                    Latency – Network round trips may introduce delays.
+                    Security – Need proper firewall and IAM policies.
+                    DNS Resolution – AWS-hosted apps may need Route 53 private hosted zones for smooth resolution.
+### 185. How does AWS Load Balancer integrate with AWS Lambda:
+          Yes, ALB directly integrates with AWS Lambda, allowing it to invoke Lambda functions without API Gateway.
+                    ALB uses event-based invocation for serverless applications.
+                    Supports multi-origin backend architectures (EC2 + Lambda in one load balancer).
+                    Reduces the need for API Gateway for simple use cases
+### 186. A Load Balancer is not distributing traffic evenly. What could be the reason:
+          Possible Causes:
+                    Cross-Zone Load Balancing is disabled (for NLB, this must be manually enabled).
+                    Sticky Sessions (Session Affinity) is enabled, forcing users to a single backend instance.
+                    Unequal instance health status, causing ELB to route requests to fewer instances.
+                    Improper Auto Scaling settings, leading to imbalanced resource allocation.
+          Troubleshooting Steps:
+                    Check Target Group Health Checks (AWS Console → Target Groups).
+                    Verify whether Cross-Zone Load Balancing is enabled.
+                    Review CloudWatch Metrics to check request distribution.
+                    Disable Sticky Sessions if load distribution is required.
+### 187. You need to migrate from a Classic Load Balancer (CLB) to an Application Load Balancer (ALB). What is your approach:
+          Migration Steps:
+                    Create an ALB with a similar listener configuration.
+                    Define Target Groups and associate EC2 instances.
+                    Update DNS records (Route 53) to point to the ALB.
+                    Modify Security Groups if needed.
+                    Monitor traffic and phase out CLB after confirming ALB is fully operational.
+          Challenges:
+                    ALB does not support TCP-only traffic (use NLB instead).
+                    Session stickiness behavior differs between CLB and ALB.
+                    Some legacy applications may not support Layer 7 routing
+### 188. How does AWS Load Balancer handle connection draining:
+          Connection Draining (Deregistration Delay) ensures active requests are completed before terminating an instance.
+                    ALB/NLB: Called Deregistration Delay, default 300 seconds.
+                    CLB: Called Connection Draining, default 300 seconds, can be set to 0-3600 seconds.
+                    Can be customized via ELB Target Group settings.
+                    This prevents dropped connections when an instance is removed or replaced.
+### 189. What is AWS Global Accelerator, and how does it compare to ELB:
+          AWS Global Accelerator is a networking service that improves global application availability and performance by routing traffic to the nearest healthy AWS endpoint.
+                    Comparison:
+                    **Feature**	                    **ELB**	                    **Global Accelerator**
+                    **Routing**	          Works at the regional level	          Works at the global level
+                    **Protocol**	          HTTP, HTTPS, TCP, UDP	          TCP, UDP
+                    **Latency Optimization**	          No	                    Yes (uses Anycast IPs)
+                   ** Multi-Region Failover**	          No	                    Yes
+                    **Best for**	          Load balancing within a region	Global traffic optimization
+          You would use Global Accelerator for latency-sensitive applications with a global user base, whereas ELB is for distributing traffic within a single region.
+### 190. How would you optimize cost when using AWS Load Balancer:
+          Use Auto Scaling – Ensure instances scale only when needed.
+          Choose the right ELB type – ALB for HTTP/HTTPS, NLB for TCP-heavy workloads.
+          Enable Cross-Zone Load Balancing (only if needed) – NLB cross-zone incurs charges.
+          Use AWS Savings Plans – Reserved Instances for predictable traffic patterns.
+          Consider Global Accelerator – Reduces reliance on multiple regional ELBs for global traffic.
