@@ -1078,3 +1078,54 @@
           Enable Cross-Zone Load Balancing (only if needed) – NLB cross-zone incurs charges.
           Use AWS Savings Plans – Reserved Instances for predictable traffic patterns.
           Consider Global Accelerator – Reduces reliance on multiple regional ELBs for global traffic.
+## DAY17
+          What is Amazon RDS:
+                    Amazon RDS (Relational Database Service) is a managed database service that makes it easy to set up, operate, and scale relational databases in the cloud. It automates time-consuming tasks like backups, patching, scaling, and replication, allowing users to focus on their applications. It supports multiple database engines such as MySQL, PostgreSQL, MariaDB, Oracle, SQL Server, and Amazon Aurora.
+### 191. Why would someone choose RDS over managing their own database:
+          The key benefits of RDS include:
+                    Managed Service – AWS handles administrative tasks like backups, patching, and scaling.
+                    High Availability – Supports Multi-AZ deployments for automatic failover.
+                    Scalability – Can be easily scaled vertically by increasing instance size or horizontally using Read Replicas.
+                    Security – Provides encryption at rest and in transit, along with fine-grained access controls.
+                    Performance Optimization – Offers automatic monitoring and tuning with Performance Insights and enhanced networking.
+### 192. Can you list the database engines available in RDS:
+          Yes, Amazon RDS supports the following database engines:
+                    MySQL, PostgreSQL, MariaDB, Oracle, Microsoft SQL Server, Amazon Aurora (MySQL and PostgreSQL compatible)
+### 193. Why would I choose RDS over running a database on EC2:
+          RDS is managed, so AWS takes care of maintenance, backups, and scaling, while in EC2, we need to handle these manually.
+          Automated backups and snapshots are available in RDS, whereas in EC2, we need to configure them ourselves.
+          Multi-AZ deployments ensure high availability in RDS, whereas for EC2, we need to configure replication manually.
+          Automatic patching in RDS, while in EC2, we are responsible for updates.
+          Scaling is easier in RDS as it supports vertical and horizontal scaling with minimal downtime.
+### 194. How is Amazon Aurora different from other RDS databases:
+          Amazon Aurora is a cloud-native relational database designed for high performance and availability. Here’s how it differs:
+                    Performance – Aurora provides up to 5x the performance of standard MySQL and 3x the performance of PostgreSQL.
+                    Storage Auto-Scaling – Automatically scales up to 128 TB.
+                    Replication – Aurora supports up to 15 read replicas, whereas standard RDS supports 5.
+                    Failover – Aurora has faster failover times due to its distributed architecture.
+                    Cost-Effective – Aurora charges only for the storage used, making it a cost-efficient option for large-scale applications.
+### 195. Can you explain Multi-AZ deployment in RDS:
+          Multi-AZ (Availability Zone) is a high availability feature in Amazon RDS. It automatically replicates data synchronously to a standby instance in a different Availability Zone. If the primary database fails, AWS automatically fails over to the standby, ensuring minimal downtime. This feature is mainly for high availability and disaster recovery rather than scaling read traffic.
+### 196. What are Read Replicas, and how do they work:
+          Read Replicas are used for scaling out read-heavy workloads. They create one or more copies of the primary database in the same or different AWS regions. These replicas asynchronously replicate data from the primary database and can be used for read queries. Unlike Multi-AZ, Read Replicas do not provide automatic failover; they are designed for improving performance by distributing read traffic.
+### 197. What types of storage does Amazon RDS support:
+          Amazon RDS supports three storage types:
+                    General Purpose SSD (gp2/gp3) – Cost-effective and provides balanced performance.
+                    Provisioned IOPS SSD (io1/io2) – High-performance storage optimized for transactional workloads.
+                    Magnetic (Standard) – Deprecated in most cases, used for legacy applications.
+### 198. What is the backup strategy in RDS:
+          RDS provides automated backups and manual snapshots:
+                    Automated Backups – Stores daily snapshots and transaction logs for point-in-time recovery, with a retention period of 1–35 days.
+                    Manual Snapshots – User-initiated backups that are retained indefinitely unless manually deleted.
+### 199. What security features does Amazon RDS provide:
+          RDS provides multiple security features:
+                    IAM authentication – Allows access control using AWS IAM.
+                    VPC Isolation – Can deploy RDS inside a private subnet.
+                    Encryption – Uses AWS KMS to encrypt data at rest and in transit.
+                    Security Groups – Controls inbound and outbound traffic.
+                    Automatic Patching – Keeps the database secure with the latest updates.
+### 200. What happens when an RDS primary instance fails:
+          In a Multi-AZ deployment, if the primary instance fails:
+                    AWS automatically switches to the standby replica.
+                    The DNS endpoint remains the same, so applications experience minimal downtime.
+                    The failover process typically completes within a few minutes.
