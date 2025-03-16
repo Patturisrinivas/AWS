@@ -1129,3 +1129,62 @@
                     AWS automatically switches to the standby replica.
                     The DNS endpoint remains the same, so applications experience minimal downtime.
                     The failover process typically completes within a few minutes.
+## DAY18
+### 201. How does cross-region replication work:
+          Yes, RDS supports cross-region Read Replicas, allowing you to replicate data asynchronously to another region for disaster recovery and global scalability
+### 202. What are the steps for migrating a database to RDS:
+          Choose a migration tool – AWS DMS (Database Migration Service) is recommended.
+          Create an RDS instance – Set up the target database.
+          Dump the data – Use mysqldump or pg_dump for manual migration.
+          Use AWS DMS – For minimal downtime, AWS DMS supports continuous replication.
+          Test the database – Validate performance and data integrity.
+          Switch applications – Update applications to use the new RDS endpoint.
+### 203. How can you reduce RDS costs:
+          Use Reserved Instances – Provides significant discounts.
+          Choose the right storage – Use gp3 instead of provisioned IOPS if performance needs are lower.
+          Use Auto Scaling – Scale instances based on workload.
+          Turn off non-production databases – Stop instances when not in use.
+### 204. Your application is experiencing high latency when querying an Amazon RDS database. How do you troubleshoot and resolve this issue:
+          To troubleshoot and resolve high latency in an RDS database, I would follow these steps:
+                    Check CloudWatch Metrics – Look at CPU utilization, memory, and disk I/O to identify resource constraints.
+                    Use Performance Insights – Identify slow-running queries and optimize them using indexes.
+                    Check Read/Write Patterns – If read-heavy, use Read Replicas to offload traffic.
+                    Review Connection Pooling – Ensure the application is not opening too many connections.
+                    Adjust Instance Size – If the instance is under-provisioned, scale up to a larger instance type.
+                    Check Query Execution Plans – Use EXPLAIN in MySQL/PostgreSQL to analyze queries.
+                    Enable Caching – Use Amazon ElastiCache (Redis/Memcached) to reduce database load.
+### 205. Your Amazon RDS instance is suddenly unavailable. How do you diagnose the issue and restore service:
+          Check AWS Health Dashboard – Ensure there are no AWS-wide issues.
+          Review CloudWatch Metrics – Check CPU, memory, and storage utilization.
+          Check RDS Events – Look for maintenance activities, failovers, or connection issues.
+          Verify Security Groups – Ensure security group rules allow inbound traffic.
+          Multi-AZ Failover – If Multi-AZ is enabled, AWS should automatically failover to the standby instance.
+          Restore from Backup – If the issue persists, restore from the latest automated backup or a manual snapshot.
+          Check for Long-Running Queries – A locked or deadlocked query can cause service disruptions.
+### 206. Your RDS instance is running out of storage. How do you handle this situation:
+          Check Storage Metrics – Monitor storage consumption using CloudWatch.
+          Enable Storage Auto Scaling – Allows automatic storage scaling when usage exceeds a threshold.
+          Manually Increase Storage – Modify the instance to allocate more storage.
+          Optimize Database Size – Remove unused indexes, archive old data, and optimize tables.
+          Use Amazon S3 for Large Objects – Offload large files or logs to S3 instead of keeping them in the database.
+### 207. Your application reports data corruption in an RDS database. How do you recover:
+          Identify the Cause – Check logs and application errors to determine what led to corruption.
+          Use Point-in-Time Recovery (PITR) – Restore to a time before the corruption occurred.
+          Restore from Manual Snapshot – If PITR is not an option, restore from the latest snapshot.
+          Verify Data Integrity – Use checksums or application-level validations.
+          Prevent Future Issues – Implement Multi-AZ for failover protection and enable automated backups.
+### 208. Your application suddenly starts failing to connect to the RDS database. How do you diagnose and fix it:
+          Check RDS Endpoint – Ensure the application is using the correct endpoint.
+          Verify Security Groups – Confirm inbound rules allow connections from the application.
+          Check IAM Policies – If IAM authentication is used, verify correct permissions.
+          Check Database Logs – Look for connection errors or failed authentication attempts.
+          Restart the Instance – If necessary, restart the RDS instance to refresh the network settings.
+          Monitor Connection Limits – Ensure the database has not exceeded the maximum allowed connections.
+### 209. When would you use Multi-AZ, and when would you use Read Replicas:
+          Use Multi-AZ when high availability and automatic failover are required. It ensures minimal downtime in case of failure.
+          Use Read Replicas when scaling read-heavy workloads. They distribute read queries but do not provide automatic failover.
+### 210. How does AWS apply maintenance and patches to RDS instances:
+          AWS schedules maintenance windows for patching and upgrades.
+          Minor version updates are automatically applied, while major versions require manual intervention.
+          Maintenance can be postponed but must be applied eventually.
+          AWS notifies users before maintenance, and downtime depends on the instance type and deployment model.
