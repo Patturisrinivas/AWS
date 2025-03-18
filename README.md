@@ -1188,3 +1188,40 @@
           Minor version updates are automatically applied, while major versions require manual intervention.
           Maintenance can be postponed but must be applied eventually.
           AWS notifies users before maintenance, and downtime depends on the instance type and deployment model.
+## DAY19
+### 211. What is Amazon CloudWatch, and how does it differ from AWS CloudTrail:
+          **Amazon CloudWatch** is a monitoring service that collects and tracks metrics, logs, and events from AWS resources and applications. It provides insights into performance, operational health, and resource utilization.
+          **AWS CloudTrail**, on the other hand, records API activity and changes to AWS resources, providing a history of actions for security and auditing purposes. 
+                    It records information like the identity of the caller, request time, source IP, and response
+### 212. What are CloudWatch Alarms, and how do they work:
+          CloudWatch Alarms monitor CloudWatch metrics and trigger automated actions based on threshold values. Actions include sending SNS notifications, Auto Scaling adjustments, or Lambda function invocations.
+### 213. How do you create a custom metric in CloudWatch:
+          You can use the AWS SDK, CLI, or API to publish custom metrics using PutMetricData. For example, an application can push a custom memory usage metric.
+### 214. Your application’s EC2 instance CPU utilization is constantly at 90%. How would you set up an alert for this in CloudWatch:
+          Navigate to the CloudWatch console and select Create Alarm.
+          Choose the CPUUtilization metric for the EC2 instance.
+          Set a threshold (e.g., >85% for 5 consecutive minutes).
+          Define an action such as sending an SNS notification to administrators or triggering an Auto Scaling action.
+### 215. How would you analyze high latency issues in an API hosted in AWS:
+          Use CloudWatch Logs Insights to query API Gateway logs for high-latency requests.
+          Check CloudWatch Metrics for API Gateway.
+          Set up CloudWatch Alarms to detect spikes in latency.
+          If using Lambda, check Duration and Throttles metrics.
+### 216. A Lambda function is failing intermittently. How would you troubleshoot using CloudWatch:
+          Check CloudWatch Logs for Lambda execution failures.
+          Review the CloudWatch Metrics (Errors, Throttles, and Invocations).
+          Use X-Ray Tracing to find performance bottlenecks.
+          Set a CloudWatch Alarm on error count to notify the team.
+### 217. How does CloudWatch Logs Insights help in real-time log analysis:
+          CloudWatch Logs Insights allows you to query and analyze log data using a SQL-like syntax. You can filter logs, visualize trends, and find anomalies.
+### 218. How do you forward CloudWatch Logs to an external monitoring tool like Splunk or ELK:
+          Use CloudWatch Log Subscriptions with a Lambda function to process logs and forward them to Splunk, ELK, or another service.
+### 219. How can you reduce CloudWatch logging costs:
+          Set log retention policies to delete old logs.
+          Use filters to log only essential events.
+          Aggregate logs into S3 for long-term storage.
+### 220. You suspect unauthorized access to your AWS account. How can you use CloudTrail to investigate:
+          Use CloudTrail Event History to filter for suspicious API calls.
+          Check for failed authentication attempts in IAM logs.
+          Investigate API calls from unfamiliar IP addresses.
+          If needed, set up GuardDuty to detect anomalies in API usage.
