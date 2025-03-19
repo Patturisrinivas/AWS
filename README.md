@@ -1225,3 +1225,46 @@
           Check for failed authentication attempts in IAM logs.
           Investigate API calls from unfamiliar IP addresses.
           If needed, set up GuardDuty to detect anomalies in API usage.
+## DAY20
+### 221. How would you track all actions taken by a specific IAM user:
+          Use CloudTrail Event History and filter by the IAM user’s ARN.
+          Enable CloudTrail Insights to detect unusual activity.
+          Configure an SNS alert for any privileged actions.
+### 222. An EC2 instance was terminated unexpectedly. How would you find out who did it:
+          Open the CloudTrail console and search for TerminateInstances events.
+          Identify the IAM user/role and timestamp of the action.
+          Cross-check with CloudWatch Alarms or AWS Config to see if automated policies triggered the termination.
+### 223. How can you secure CloudTrail logs from being tampered with:
+          Enable S3 bucket logging and object versioning.
+          Use S3 access policies to restrict modifications.
+          Enable CloudTrail Log File Validation.
+### 224. How can CloudTrail be integrated with SIEM solutions:
+          Use AWS Lambda to process logs and forward them to Splunk or ELK.
+          Utilize Amazon Kinesis Data Firehose to stream logs to a SIEM tool.
+### 225. What is CloudTrail Insights, and how does it help in anomaly detection:
+          CloudTrail Insights detects unusual API call patterns, such as spikes in failed authentication attempts or increased resource deletions.
+### 226. How do you differentiate between a real user action and an automated process in CloudTrail logs:
+          Check the user identity type in CloudTrail logs.
+          Look at source IP (e.g., automated processes may originate from AWS services)
+          Identify patterns of execution (e.g., periodic actions suggest automation)
+### 227. How do you verify if the alarm actually transitioned to the ALARM state:
+          Go to the CloudWatch console → Alarms section.
+          Locate the specific alarm and check its History tab.
+          Look for State Transition Events to see if it changed from OK → ALARM.
+          If the state remains in OK or INSUFFICIENT_DATA, it means the condition was not met consistently.
+### 228. Which specific CloudWatch metrics help identify whether the issue is CPU, disk, or network-related:
+          CPU Issues: CPUUtilization
+          Disk Bottlenecks: DiskReadOps, DiskWriteOps, DiskQueueLength
+          Network Issues: NetworkIn, NetworkOut, NetworkPacketsIn, NetworkPacketsOut
+          If the issue is I/O related, EBS metrics like VolumeQueueLength and VolumeIdleTime should be checked
+### 229. How can you check if a Lambda function or external process is deleting logs prematurely:
+          Open CloudTrail and search for DeleteLogStream or DeleteLogGroup events.
+          Check IAM permissions of Lambda functions, automation scripts, or lifecycle policies that may be modifying logs.
+          If using Kinesis Firehose or Lambda subscriptions, check whether logs are being forwarded elsewhere before deletion.
+### 230. How can AWS GuardDuty complement CloudTrail in detecting malicious activities:
+          GuardDuty analyzes CloudTrail logs to detect unusual API activities.
+          It identifies threats like:
+                    Unauthorized API calls
+                    Excessive login failures
+                    Data exfiltration attempts
+          GuardDuty generates security findings that can be automatically acted upon using Lambda or AWS Security Hub.
