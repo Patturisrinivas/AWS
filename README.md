@@ -1268,3 +1268,93 @@
                     Excessive login failures
                     Data exfiltration attempts
           GuardDuty generates security findings that can be automatically acted upon using Lambda or AWS Security Hub.
+## DAY21
+### 231. What are the cost implications of enabling CloudTrail Data Events for all S3 buckets:
+          Data Events incur additional charges per 100,000 recorded events.
+          If tracking all objects across multiple buckets, the cost can increase significantly.
+          A best practice is to enable Data Events only for specific high-value S3 buckets to reduce cost.
+### 232. Can you list the different types of EBS volumes and when you would use each:
+          General Purpose SSD (gp3, gp2) – Balances price and performance, good for general workloads like web servers and application hosting.
+          Provisioned IOPS SSD (io2, io1) – High-performance storage with low latency, ideal for databases and critical applications.
+          Throughput Optimized HDD (st1) – Designed for high-throughput workloads like big data and log processing.
+          Cold HDD (sc1) – Low-cost storage for infrequent access, like backups and archives.
+          Magnetic (standard, legacy) – Older generation, rarely used now.
+          The choice depends on workload requirements. For example, for a high-performance database, I’d choose io2, but for a general application server, gp3 would be cost-effective.
+### 233. Suppose you have an application running on an EC2 instance, and the EBS volume is running out of space. How would you resize the volume without downtime:
+          AWS allows resizing EBS volumes dynamically using Elastic Volumes. Here’s how I’d do it without downtime:
+                    Use the AWS Console or CLI to modify the volume size (aws ec2 modify-volume --volume-id <vol-id> --size <new-size>).
+                    Monitor the state of the volume until it reflects the new size.
+                    Inside the EC2 instance, use OS-specific commands:
+                              For Linux: Use lsblk to check the new size, then growpart and resize2fs (for ext4) or xfs_growfs (for XFS).
+                              For Windows: Use the Disk Management utility to extend the volume.
+                    Since EBS supports online resizing, the process does not require downtime
+### 234. What are the different ways to back up an EBS volume, and how do you ensure backup reliability:
+          The most common way to back up an EBS volume is by creating EBS snapshots. A snapshot is an incremental backup stored in Amazon S3.
+          Best practices for EBS snapshots:
+                    Use AWS Backup to automate snapshot creation.
+                    Follow a snapshot lifecycle policy to automatically delete old snapshots and save costs.
+                    Use cross-region replication to store backups in another region for disaster recovery.
+                    Ensure application consistency by pausing writes before taking snapshots (especially for databases).
+          To take a manual backup:
+                    aws ec2 create-snapshot --volume-id vol-1234567890abcdef --description "Backup before upgrade"
+          For automated backups, I’d set up AWS Data Lifecycle Manager (DLM)
+### 235.  Let's say you're working with sensitive data. How would you ensure your EBS volume is encrypted:
+          AWS provides built-in encryption for EBS volumes using AWS Key Management Service (KMS). When creating a new volume, you can enable encryption, and AWS will handle encryption-at-rest, in-transit, and snapshot encryption.
+          To encrypt an existing volume:
+                    Take a snapshot of the existing unencrypted volume.
+                    Create a new encrypted volume from the snapshot.
+                    Attach the encrypted volume to the EC2 instance.
+          Encryption considerations:
+                    Performance impact: AWS offloads encryption, so there’s minimal performance overhead.
+                    Cross-region security: If you copy an encrypted snapshot to another region, you need a KMS key in the destination region.
+                    Access control: Use IAM policies to restrict KMS key usage.
+### 236. Your company requires a highly available storage solution using EBS. How would you design it:
+          EBS volumes are AZ-specific, so for high availability, I’d design a multi-AZ solution:
+                    EBS Replication – Take frequent snapshots and copy them to another AZ. Use Amazon DLM for automation.
+                    EFS (Elastic File System) – If shared storage is needed across multiple instances in different AZs.
+                    RAID Configuration – For performance and redundancy:
+                              RAID 1 (Mirroring): Provides redundancy, but at double the cost.
+                              RAID 0 (Striping): Improves performance but has no redundancy.
+                    Cross-region DR – Copy snapshots to another region for disaster recovery.
+          For a database, I’d use RDS Multi-AZ instead of relying solely on EBS.
+### 237. Your application is experiencing slow disk performance. What steps would you take to diagnose and resolve the issue:
+          I’d follow these steps:
+                    Check CloudWatch Metrics:
+                              VolumeQueueLength: High values indicate IOPS saturation.
+                              VolumeReadOps/WriteOps: Check if it matches the expected throughput.
+                              BurstBalance: For gp2 volumes, depletion of burst credits can cause performance drops.
+                    Analyze Instance Type:
+                              Ensure the instance supports the expected EBS bandwidth. Some instance types limit throughput.
+                    Upgrade the Volume:
+                              If using gp2, consider switching to gp3 or io2 for better IOPS.
+                              Use aws ec2 modify-volume to adjust the size or type.
+                    Check OS-Level Issues:
+                              Run iostat -xm 2 on Linux to check disk utilization.
+                              Verify filesystem fragmentation and defragment if needed.
+                    Use RAID 0:
+                              Striping data across multiple EBS volumes can enhance performance.
+### 238. Can you explain what Amazon EFS is and how it differs from EBS:
+          Sure! Amazon Elastic File System (EFS) is a fully managed, scalable, and shared file storage system designed for Linux-based workloads. It allows multiple EC2 instances to access the same file system simultaneously, making it ideal for distributed applications.
+          The key differences between EFS and EBS are:
+                    EFS is a shared file system, whereas EBS is a block storage service attached to a single instance.
+                    EFS scales automatically, while EBS requires manual resizing.
+                    EFS supports multiple instances across different AZs, whereas EBS is tied to a single AZ.
+                    EFS is best for shared storage needs, such as web servers, containerized applications, and big data workloads.
+### 239. Suppose you have an EC2 instance and need to mount an EFS file system. How would you do it:
+          To mount an EFS file system on an EC2 instance, I would follow these steps:
+          Ensure NFS utilities are installed:
+                    sudo yum install -y amazon-efs-utils  # For Amazon Linux
+                    sudo apt-get install -y nfs-common    # For Ubuntu
+          Mount the file system manually:
+                    sudo mount -t efs fs-12345678:/ /mnt/efs
+          To make it persistent after reboot, add the following entry to /etc/fstab:
+                    fs-12345678:/ /mnt/efs efs defaults,_netdev 0 0
+### 240. Your application needs high availability for shared storage. How would you configure Amazon EFS for this:
+          EFS is designed for high availability by default because:
+                    It is multi-AZ, meaning data is automatically replicated across multiple Availability Zones.
+                    It has auto-scaling, so storage grows and shrinks as needed.
+                    It provides Regional Resiliency, meaning all instances within a region can access the same file system.
+          To enhance availability:
+                    Deploy EC2 instances in multiple AZs.
+                    Use Amazon EFS mount targets in each AZ.
+                    Set up AWS Backup to protect against accidental deletions.
