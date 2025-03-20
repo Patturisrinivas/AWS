@@ -1358,3 +1358,84 @@
                     Deploy EC2 instances in multiple AZs.
                     Use Amazon EFS mount targets in each AZ.
                     Set up AWS Backup to protect against accidental deletions.
+## DAY22
+### 241. How does Amazon EFS handle performance scaling, and what are the best practices to optimize performance:
+          EFS automatically scales based on demand, supporting both throughput and IOPS growth. It has two performance modes:
+                    General Purpose Mode – Best for latency-sensitive applications.
+                    Max I/O Mode – Designed for highly parallel workloads but with higher latency.
+          To optimize EFS performance:
+                    Use provisioned throughput if your workload requires consistent performance.
+                    Distribute I/O operations across multiple files rather than a single large file.
+                    Enable Elastic Throughput, which provides automatic scaling based on usage.
+                    Use Amazon CloudWatch to monitor file system metrics and adjust throughput accordingly.
+### 242. Security is a top priority for your application. How would you secure EFS data:
+          To secure EFS, I would implement the following measures:
+                    Encryption at Rest:
+                              Enable AWS KMS-based encryption while creating the EFS file system.
+                              Ensure encryption is enabled for all stored data.
+                    Encryption in Transit:
+                              Use TLS to encrypt data being transferred between EC2 instances and EFS.
+                              Mount the file system with encryption enabled:
+                                        sudo mount -t efs -o tls fs-12345678:/ /mnt/efs
+                    Access Control:
+                              Use IAM policies to restrict access to EFS.
+                              Configure security groups and NFS client access rules to limit access.
+                              Apply POSIX file permissions for fine-grained control over file access.
+                    Network Security:
+                              Ensure that the EFS file system is only accessible within the VPC.
+                              Use AWS PrivateLink to restrict access further.
+### 243. Your application is experiencing slow performance with EFS. How would you troubleshoot the issue:
+          I’d follow these steps:
+                    Check CloudWatch Metrics:
+                              BurstCreditBalance: If it’s low, consider using provisioned throughput.
+                              PercentIOLimit: If it’s high, your workload might be exceeding the file system’s capability.
+                              TotalIOBytes: Helps determine if a single file or directory is the bottleneck.
+                    Verify Mount Options:
+                              Ensure the file system is mounted using amazon-efs-utils instead of standard NFS for better performance.
+                              Use recommended mount options:
+                                        sudo mount -t efs -o nfsvers=4.1,tls fs-12345678:/ /mnt/efs
+                    Check Instance Network Throughput:
+                              Since EFS performance depends on network bandwidth, ensure the EC2 instance type supports high network throughput.
+                    Optimize File Access Patterns:
+                              If many clients access the same file, consider breaking it into smaller files.
+                              Use Max I/O mode for highly concurrent workloads.
+### 244. How would you decide when to use EBS instead of instance store:
+          I’d choose EBS when I need persistent storage that survives instance stops or terminations. It’s ideal for databases, application servers, and workloads requiring snapshots and backups.
+          Instance store, on the other hand, is best when I need temporary, high-performance storage that’s automatically cleared when the instance stops. It’s useful for caching, temporary processing, or batch jobs where persistence isn’t necessary.
+### 245. Is it possible to upgrade an existing gp2 volume to gp3 without downtime:
+          Yes, AWS allows you to upgrade an existing gp2 volume to gp3 without downtime. The process is simple:
+          Run the command:
+                    aws ec2 modify-volume --volume-id vol-1234567890abcdef --volume-type gp3
+          The volume modification happens in the background, and AWS ensures there’s no service interruption
+          One advantage of gp3 over gp2 is that it provides consistent performance and allows you to configure IOPS and throughput independently.
+### 246. Can you downsize an EBS volume? What happens if you try:
+          No, EBS does not support reducing the size of a volume. Once you increase the size, you cannot shrink it directly.
+          If I need to downsize a volume, I would:  
+                    Take a snapshot of the current volume.
+                    Create a new, smaller volume from the snapshot.
+                    Attach the new volume to the instance and update the file system.
+### 247. If you have an EBS snapshot, can you restore it in a different Availability Zone:
+          Yes, EBS snapshots are stored in Amazon S3 and are region-wide, meaning I can restore them in any AZ within the same region.
+                    Steps:
+                    Create a new volume from the snapshot in the desired AZ:
+                              aws ec2 create-volume --snapshot-id snap-1234567890abcdef --availability-zone us-east-1b
+                    Attach the new volume to an instance in that AZ.
+          If I need to move the snapshot to another region, I’d copy the snapshot first:
+                    aws ec2 copy-snapshot --source-region us-east-1 --source-snapshot-id snap-1234567890abcdef --destination-region us-west-1
+### 248. Can you share an encrypted EBS snapshot with another AWS account? If so, how:
+          Yes, but there are additional steps for encrypted snapshots compared to unencrypted ones.
+          I need to share the snapshot explicitly with another AWS account:
+                    aws ec2 modify-snapshot-attribute --snapshot-id snap-1234567890abcdef --attribute createVolumePermission --operation-type add --account-id 123456789012
+          Since it’s encrypted, I must also share the KMS key used for encryption.
+          The receiving account must create a new volume from the shared snapshot before using it.
+          Without sharing the KMS key, the other AWS account won’t be able to access the snapshot.
+### 249. Is it possible to attach an EBS volume to multiple EC2 instances at the same time:
+          By default, an EBS volume can only be attached to one EC2 instance at a time. However, there’s an exception:
+                    EBS Multi-Attach (for io1/io2 volumes only): This allows an EBS volume to be attached to multiple instances in the same AZ.
+                    All attached instances must run a cluster-aware file system (like Amazon FSx for Lustre or Oracle Cluster File System).
+          For standard use cases, I’d use Amazon EFS instead of trying to share an EBS volume.
+### 250. Suppose an application requires 10,000 IOPS. How would you configure EBS to support this:
+          I would use an io2 volume, which allows provisioned IOPS:
+                    io2 supports up to 1000 IOPS per GiB, so I’d create a volume with at least 10 GiB to meet the 10,000 IOPS requirement.
+                    If I need additional performance, I could use RAID 0 striping across multiple volumes.
+                    Monitor with CloudWatch and adjust the volume if necessary.
