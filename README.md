@@ -1439,3 +1439,80 @@
                     io2 supports up to 1000 IOPS per GiB, so I’d create a volume with at least 10 GiB to meet the 10,000 IOPS requirement.
                     If I need additional performance, I could use RAID 0 striping across multiple volumes.
                     Monitor with CloudWatch and adjust the volume if necessary.
+## DAY23
+### 251. Can Windows EC2 instances use EFS:
+          No, Amazon EFS only supports Linux-based instances because it uses the NFSv4 protocol, which Windows does not support natively.
+          For Windows, I’d use:
+                    Amazon FSx for Windows File Server, which provides SMB-based file shares.
+                    EBS with Windows Storage Spaces, if local storage is required.
+### 252. How does lifecycle management work in EFS, and can you customize it:
+          EFS lifecycle management automatically moves files between Standard and Infrequent Access (IA) storage classes based on access patterns.
+                    AWS provides preset age-based policies (e.g., move files to IA after 7, 14, 30, 60, or 90 days).
+                    These policies are customizable, but they only apply to the entire file system, not individual files.
+### 253. Can an EC2 instance in a different region access an EFS file system:
+          No, EFS file systems are region-specific. However, I can use AWS DataSync or Cross-Region Replication to copy files to another region.
+### 254. If the AWS region hosting an EFS file system fails, what happens:
+          Since EFS is regional, it becomes unavailable if the region fails. To mitigate this:
+                    Use AWS Backup to keep a copy in another region.
+                    Replicate data using AWS DataSync to a second region.
+### 255. What are burst credits in EFS, and what happens if they run out:
+          EFS bursts performance based on burst credits. Every file system earns credits over time and uses them when it needs high throughput.
+          If credits run out, the file system drops to its baseline throughput, which can slow down applications.
+          To avoid this, I’d enable Provisioned Throughput for predictable performance.
+### 256. Can you share an EFS file system with another AWS account:
+          Yes, using resource-based IAM policies. I’d:
+                    Attach a policy allowing access to another AWS account.
+                    Ensure the security group and NFS settings allow connections.
+### 257. If an application has a high-read, low-write workload, how do you optimize EFS:
+          I’d:
+                    Use EFS read replicas (if possible).      
+                    Enable Elastic Throughput to handle variable workloads.
+                    Implement caching with Amazon CloudFront or local caching on EC2.
+### 258. Your EC2 instance crashed, and now the attached EBS volume is unresponsive. How do you recover the data:
+          If the EBS volume is unresponsive, I’d take these recovery steps:
+          1. Detach the EBS Volume:
+                    aws ec2 detach-volume --volume-id vol-1234567890abcdef
+          2. Attach the Volume to Another Healthy EC2 Instance:
+                    Launch a new instance in the same AZ.
+                    Attach the volume as a secondary device
+          3. Check the File System:
+                    List available volumes:
+                              lsblk
+                    Run a file system check and repair if needed:
+                              sudo fsck -y /dev/xvdf
+                    If using XFS, run:
+                              sudo xfs_repair /dev/xvdf
+          4. Mount and Recover Data:
+                    Mount the volume to access files:
+                              sudo mount /dev/xvdf /mnt/recovery
+                    Copy important files to another location.
+          5. Create a Snapshot for Future Protection:
+                    aws ec2 create-snapshot --volume-id vol-1234567890abcdef --description "Backup before reattaching"
+          6. Reattach the Volume to the Original Instance:
+                    If the issue was instance-related, I would stop the instance and reattach the volume.
+### 259. Your application is failing because the EBS volume is out of space. How do you increase its size without downtime:
+          Expanding an EBS volume without downtime requires these steps:
+                    1. Modify the EBS Volume:
+                              aws ec2 modify-volume --volume-id vol-1234567890abcdef --size 100
+                    The expansion happens in the background and does not cause downtime.
+                    2. Wait for the Resize to Complete:
+                              aws ec2 describe-volumes-modifications --volume-id vol-1234567890abcdef
+                    3. Resize the File System:
+                              If using ext4:
+                                        sudo resize2fs /dev/xvdf
+                              If using XFS:
+                                        sudo xfs_growfs -d /
+### 260. Your application team reports slow performance while reading and writing to an EFS file system. How do you troubleshoot:
+          I would take these troubleshooting steps:
+                    1. Check CloudWatch Metrics:
+                              BurstCreditBalance: If low, the system is out of burst credits.
+                              TotalIOBytes: Helps understand read/write patterns.
+                    2. Use the Right Performance Mode:
+                              Switch to Max I/O Mode if there are many parallel operations.
+                    3. Check Mount Options:
+                              Ensure correct NFS mount options:
+                                        sudo mount -t efs -o nfsvers=4.1,tls fs-12345678:/ /mnt/efs
+                    4. Consider Using Caching or CloudFront:
+                              Implement Amazon CloudFront for static files.
+                    5. Upgrade EC2 Instances for Higher Network Throughput.
+          
