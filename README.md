@@ -1515,4 +1515,118 @@
                     4. Consider Using Caching or CloudFront:
                               Implement Amazon CloudFront for static files.
                     5. Upgrade EC2 Instances for Higher Network Throughput.
-          
+## DAY24
+### 261. Your ECS service, running on an EC2 launch type, is failing, and containers are not starting. How do you troubleshoot and resolve the issue:
+          If an ECS service is failing on an EC2 launch type, I would take the following troubleshooting steps:
+
+          1. Check ECS Service and Task Events:
+                    Navigate to the ECS console → Services and check the Events tab to see failure messages.
+                    Run:
+                              aws ecs describe-services --cluster my-cluster --services my-service
+                    This shows the status of running and pending tasks.
+          2. Verify EC2 Instance Status:
+                    Ensure the ECS container instances are running.
+                    Run:
+                              aws ecs list-container-instances --cluster my-cluster
+                    Check if the instance has failed health checks or was terminated.
+         3. Check IAM Permissions:
+                    The ECS agent requires proper permissions (AmazonEC2ContainerServiceforEC2Role).
+                    Verify if the ECS task execution role is correctly attached.
+          4. Check CPU & Memory Usage:
+                    If CPU or memory is exhausted, tasks may stop unexpectedly.
+                    Run:
+                              aws ecs describe-tasks --cluster my-cluster --tasks <task_id>
+                    Increase CPU/memory limits if needed.
+          5. Check Docker and ECS Agent Logs on EC2:
+                    SSH into the instance and check logs:
+                              sudo journalctl -u docker
+                              sudo journalctl -u ecs
+                    Restart the ECS agent:
+                              sudo systemctl restart ecs
+          6. Inspect Task Definition:
+                    Ensure the container image is valid.
+                    Verify networking settings, environment variables, and health checks.
+### 262. You need to run an ECS service on private subnets without public internet access. How would you set up networking:
+          To run ECS in private subnets:
+          1. Ensure Subnets Are Private:
+                    The route table should not have an Internet Gateway (IGW).
+                    Instead, add a NAT Gateway to allow outbound internet traffic.
+          2. Use AWS VPC Endpoints for Communication:
+                    Create VPC endpoints for ECR, S3, and CloudWatch so ECS can pull images without internet access.
+          3. Configure ECS Task Networking:
+                    For Fargate:
+                              {
+                                "awsvpcConfiguration": {
+                                  "subnets": ["subnet-abc123"],
+                                  "securityGroups": ["sg-123456"],
+                                  "assignPublicIp": "DISABLED"
+                                }
+                              }
+                    For EC2, attach instances to a private subnet
+### 263. You need to update an ECS service but must ensure zero downtime. How would you achieve this:
+          To ensure zero downtime deployment when updating an ECS service, I would use the following deployment strategies:
+                    1. Rolling Updates (Default):
+                              Update the ECS task definition and service with a new image.
+                              Set minimum healthy percent = 100% and maximum percent = 200% to ensure new tasks start before stopping old ones.
+                              Run:
+                                        aws ecs update-service --cluster my-cluster --service my-service --task-definition new-task
+                    2. Blue/Green Deployment (Using AWS CodeDeploy):
+                              Create a new ECS service (green) while keeping the existing service (blue) running.
+                              Use AWS CodeDeploy to switch traffic gradually.
+                              If issues occur, rollback without downtime.
+                    3. Canary Deployment:
+                              Deploy to a subset of tasks first, monitor for failures, then scale up.
+                              Example: Deploy to 10% of tasks first, then 100%.
+                    4. Load Balancer Health Checks:
+                              Ensure the Target Group health check is set up properly so old tasks are removed only when the new ones are healthy.
+                    5. Use Service Autoscaling:
+                              If using ECS Fargate, configure auto-scaling to handle additional load during deployment.
+### 264. Your ECS containers are being killed due to memory limits. What actions will you take:
+          If tasks are failing due to out-of-memory (OOM) errors, I would:
+                    1. Check Memory Usage Metrics in CloudWatch:
+                    Monitor MemoryUtilization and MemoryReservation.
+                    2. Increase Memory Limits in Task Definition:
+                              Update the task definition with higher memory values:
+                                        {
+                                          "containerDefinitions": [
+                                            {
+                                              "name": "my-container",
+                                              "memory": 512,
+                                              "memoryReservation": 256
+                                            }
+                                          ]
+                                        }
+                              memory: Hard limit; the container gets killed if exceeded.
+                              memoryReservation: Soft limit; tasks get more memory if available.
+                    3. Enable ECS Task Auto-Scaling:
+                              Use Service Auto Scaling to handle unexpected load spikes.
+                    4. Optimize the Application:
+                              Identify memory leaks in the application using logging and profiling tools.
+                              Run lightweight applications or optimize background processes.
+                    5. Use Spot Instances with Larger Memory (For EC2 Launch Type):
+                              If running on EC2, choose instances with higher memory capacity.
+### 265. Your ECS Fargate task is failing because it cannot pull the container image from Amazon ECR. What steps do you take:
+           If an ECS Fargate task cannot pull an image, I would check:
+                    1. Verify IAM Permissions for Task Execution Role:
+                              The task execution role must have the following permissions:
+                                        {
+                                "Effect": "Allow",
+                                "Action": [
+                                  "ecr:GetDownloadUrlForLayer",
+                                  "ecr:BatchGetImage",
+                                  "ecr:GetAuthorizationToken"
+                                ],
+                                "Resource": "*"
+                              }
+                              Ensure the task is running with the correct execution role.
+                    2. Check ECR Repository Policies:
+                              If the image is in a private ECR repository, ensure the repository policy allows access.
+                    3. Verify Image Tag and Name:
+                              If the image tag was changed or removed, update the task definition with the correct tag.    
+                              Run:
+                                        aws ecr describe-images --repository-name my-repo
+                    4. Confirm ECR Authentication:
+                              If running manually, log in before pulling:
+                                        aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin <ECR_URI>
+                    5. Check Network Settings:
+                              If the ECR repository is in a different VPC or private subnet, configure VPC endpoints for ECR.
