@@ -1630,3 +1630,108 @@
                                         aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin <ECR_URI>
                     5. Check Network Settings:
                               If the ECR repository is in a different VPC or private subnet, configure VPC endpoints for ECR.
+## DAY25
+### 266. If the ECS agent on your EC2 instance is disconnected from the cluster, how do you fix it and re-register it:
+          If an ECS agent is disconnected, the container instance will not report to the ECS cluster. To troubleshoot and re-register the ECS agent, I would follow these steps:
+          1. Check the ECS Agent Status on the EC2 Instance:
+                    SSH into the EC2 instance and check if the ECS agent is running:
+                              sudo systemctl status ecs
+                    If it’s stopped, restart it:
+                              sudo systemctl restart ecs
+          2. Ensure the ECS Agent is Running with the Correct Cluster Name:
+                    Verify the cluster name in the ECS configuration file:
+                              cat /etc/ecs/ecs.config
+                    If the cluster name is missing or incorrect, update it:
+                              echo "ECS_CLUSTER=my-cluster-name" | sudo tee -a /etc/ecs/ecs.config
+                              sudo systemctl restart ecs
+          3. Check IAM Role and Security Group
+                    Ensure the EC2 instance IAM role has the required ECS permissions:
+                              AmazonEC2ContainerServiceforEC2Role
+                    Verify that outbound rules allow communication with the ECS control plane.
+          4. Manually Re-register the ECS Agent (If Required):
+                    If the agent is still not connecting, manually re-register the instance:
+                              sudo amazon-linux-extras enable ecs
+                              sudo yum install -y ecs-init
+                              sudo systemctl enable ecs
+                              sudo systemctl start ecs
+          5. If the Instance is Stuck, Deregister and Re-add:
+                    If an instance remains disconnected, deregister it:
+                              aws ecs deregister-container-instance --cluster my-cluster --container-instance my-instance-id --force
+### 267. How do you make sure ECS Fargate tasks can pull images from ECR without needing a manual login:
+          In ECS Fargate, we use the task execution IAM role to grant the necessary permissions so that the task can pull images without manual authentication. Here’s how to ensure this:
+
+          1. Attach the Correct IAM Role to the ECS Task:
+                    The task execution role must have the following IAM policy attached:
+                              {
+                                "Effect": "Allow",
+                                "Action": [
+                                  "ecr:GetAuthorizationToken",
+                                  "ecr:BatchCheckLayerAvailability",
+                                  "ecr:GetDownloadUrlForLayer",
+                                  "ecr:BatchGetImage"
+                                ],
+                                "Resource": "*"
+                              }
+                    This allows the ECS Fargate task to authenticate to ECR automatically.
+          2. Ensure the Task Definition References the Correct Role:
+                    In the task definition, specify the execution role:
+                              "executionRoleArn": "arn:aws:iam::account-id:role/ecsTaskExecutionRole"
+          3. Use Amazon ECR VPC Endpoints (For Private Subnets):
+                    If the Fargate tasks run in private subnets, configure VPC endpoints for ECR to ensure seamless access.
+### 268. How does AWS CodeDeploy automate blue/green deployments in ECS:
+          AWS CodeDeploy enables blue/green deployments for ECS by creating a new version of the service (green environment) while keeping the existing service (blue environment) running. It then shifts traffic gradually, ensuring a zero-downtime rollout. Here’s how it works:
+          1. CodeDeploy Creates a New Task Set (Green Deployment):
+                    A new task set (green) is launched alongside the existing task set (blue).
+                    This is done inside the same ECS service.
+          2. Traffic Shifting Using a Load Balancer:
+                    CodeDeploy reroutes traffic gradually from the blue (old) version to the green (new) version.
+                    You can configure it to shift all traffic at once or in increments (canary deployments).
+          3. Monitoring & Rollback:
+                    You can set up CloudWatch alarms to monitor deployment success.
+                    If the new version (green) fails health checks, CodeDeploy automatically rolls back to the old version (blue).
+          4. Finalizing the Deployment:
+                    Once the deployment succeeds, the old (blue) task set is terminated.
+                    The new (green) version becomes the active service.
+### 269. What is the difference between memory and memoryReservation in an ECS task definition:
+          In ECS, both memory and memoryReservation control how much RAM a container gets, but they work differently:
+                    1. memory (Hard Limit):
+                              The maximum amount of memory the container can use.
+                              If the container exceeds this limit, it gets killed (OOM error).
+                              Example:
+                                        "memory": 512
+                              If a container needs 512MB but tries to use 600MB, it crashes.
+                    2. memoryReservation (Soft Limit):
+                              A soft limit that ECS tries to reserve for the container.
+                              The container can exceed this limit if extra memory is available.
+                              Example:
+                              "memoryReservation": 256
+                              If no memory is available, the container may get throttled but won’t be forcefully stopped.
+                    Best Practice:
+                    Set memoryReservation to a safe minimum and memory to an upper limit.
+                    Example:
+                    {
+                      "memory": 1024,
+                      "memoryReservation": 512
+                    }
+                    This ensures the container gets at least 512MB but won’t exceed 1GB.
+### 270. Your ECS tasks are in a private subnet with no internet access. How can they pull images from ECR:
+          Since private subnets don’t have direct internet access, ECS tasks cannot reach Amazon ECR without additional configurations. Here’s how to enable communication:
+          1. Use AWS VPC Endpoints for ECR:
+                    Create a VPC endpoint for ECR API and ECR Docker:
+                              aws ec2 create-vpc-endpoint --vpc-id vpc-1234 --service-name com.amazonaws.us-east-1.ecr.api
+                              aws ec2 create-vpc-endpoint --vpc-id vpc-1234 --service-name com.amazonaws.us-east-1.ecr.dkr
+                    This allows ECS tasks to pull images from ECR without an internet gateway or NAT Gateway.
+          2. Enable ECR IAM Permissions:
+                    The ECS task execution role must have:
+                              {
+                                "Effect": "Allow",
+                                "Action": [
+                                  "ecr:GetAuthorizationToken",
+                                  "ecr:BatchGetImage",
+                                  "ecr:GetDownloadUrlForLayer"
+                                ],
+                                "Resource": "*"
+                              }
+          3. Check DNS Resolution in Private Subnet:
+                    Ensure DNS resolution is enabled in the VPC settings so that ecr.amazonaws.com resolves correctly.
+                    By using VPC endpoints, ECS tasks in private subnets can securely communicate with ECR without internet access.
