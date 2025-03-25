@@ -1735,3 +1735,147 @@
           3. Check DNS Resolution in Private Subnet:
                     Ensure DNS resolution is enabled in the VPC settings so that ecr.amazonaws.com resolves correctly.
                     By using VPC endpoints, ECS tasks in private subnets can securely communicate with ECR without internet access.
+## DAY
+### 271. Can you explain a scenario where using Amazon EKS would be more beneficial than running Kubernetes on EC2:
+          Yes, let’s consider a scenario where a company is running multiple microservices that require high availability, scalability, and minimal operational overhead.
+          If they deploy Kubernetes on EC2 instances (self-managed cluster), they would need to handle tasks like setting up the control plane, managing updates, handling scaling, ensuring high availability, and securing the cluster.
+          By using Amazon EKS, AWS manages the Kubernetes control plane, including upgrades, patching, and scaling. This significantly reduces the operational burden. Additionally, EKS integrates natively with AWS services like IAM, VPC, CloudWatch, and ALB, making security and monitoring more seamless compared to a self-managed Kubernetes cluster.
+
+### 272. How would you securely connect on-premise applications to an EKS cluster running in AWS:
+          To securely connect on-premise applications to an EKS cluster, I would consider the following options:
+          AWS Direct Connect:
+                    Establish a dedicated Direct Connect link for low-latency and high-bandwidth access.
+          Site-to-Site VPN:
+                    Use an AWS VPN connection to securely connect on-prem resources to the VPC where EKS is deployed.
+          Service Mesh (Istio or App Mesh):
+                    Implement a service mesh for secure communication between on-prem services and EKS workloads.
+          Ingress Controller with TLS:
+                    Deploy AWS ALB or NGINX Ingress Controller with mutual TLS authentication.  
+          IAM Role Assumptions & Fine-Grained Access Control:
+                    Use IAM roles for service accounts (IRSA) to allow least-privilege access.
+                    Restrict API access using Kubernetes RBAC policies.
+          This setup ensures security, scalability, and minimal latency when connecting on-premise applications to an EKS cluster.
+### 273. Your company needs a disaster recovery strategy for an EKS cluster. What approach would you take:
+          For disaster recovery (DR) in an EKS cluster, I would implement the following strategies:
+          Cluster Backup & Restore:
+                    Regularly back up etcd data (for self-managed clusters) or use AWS Backup for EKS.
+                    Use velero to back up Kubernetes resources and persistent volumes.
+          Multi-Region Replication:
+                    Deploy EKS clusters in multiple regions.
+                    Use Cross-Region Replication (CRR) for S3 and EBS snapshots to replicate storage.
+                    Implement AWS Global Accelerator for failover routing.
+          Infrastructure as Code (IaC):
+                    Use Terraform or CloudFormation to quickly spin up a new EKS cluster if needed.
+          Database Replication:
+                    Use Amazon RDS Multi-AZ or Amazon Aurora Global Database for data resilience.
+          DNS Failover:
+                    Configure Route 53 health checks to redirect traffic to a healthy region.
+          By implementing these measures, I can ensure minimal downtime and quick recovery during a disaster.
+### 274. Suppose your EKS cluster has performance issues. How would you troubleshoot and optimize it:
+          If I notice performance degradation in an EKS cluster, I would follow these steps:
+          Check Node Utilization:
+                    Use kubectl top nodes and kubectl top pods to check CPU and memory utilization.
+                    If nodes are under-provisioned, I would scale up the node group.
+          Analyze Pod Scheduling Issues:
+                    Use kubectl get events to check for scheduling failures.
+                    If pods are pending, I would inspect if there are resource constraints or missing node taints.
+          Monitor Network Latency:
+                    Check Amazon VPC CNI metrics to identify pod-to-pod communication issues.
+                    If necessary, optimize CIDR allocation and enable enhanced networking on nodes.
+          Check Load Balancer Health:
+                    Use AWS ALB/NLB logs to ensure traffic is being distributed evenly.
+                    If an imbalance exists, I would adjust pod readiness/liveness probes.
+          Enable Auto Scaling:
+                    Use Cluster Autoscaler for scaling worker nodes dynamically.
+                    Implement Horizontal Pod Autoscaler (HPA) based on CPU/memory utilization.
+          By following these steps, I can identify bottlenecks and optimize the EKS cluster for better performance.
+### 275. How would you design a multi-tenant architecture using Amazon EKS:
+          In a multi-tenant environment, different teams or applications may share the same EKS cluster while maintaining isolation. There are a few strategies to achieve this:
+          Namespace-Based Isolation:
+                    Create separate namespaces for different tenants.
+                    Apply RBAC (Role-Based Access Control) policies to restrict access to specific namespaces.
+                    Use ResourceQuotas to limit resource consumption per namespace.
+          Node Pool Isolation:
+                    Use taints and tolerations to dedicate worker nodes to specific tenants.
+                    Assign different AWS IAM roles to node groups for permission control.
+          Separate VPCs or Network Policies:
+                    Implement Kubernetes NetworkPolicies to restrict communication between different tenants.
+                    Use AWS PrivateLink or service mesh (like Istio) to control cross-tenant traffic.
+          This design ensures security, cost optimization, and scalability while allowing multiple tenants to coexist on the same EKS cluster
+### 276. How would you handle networking configurations in an EKS cluster to ensure proper communication between microservices:
+          To ensure proper communication between microservices in an EKS cluster, I would focus on:
+          Networking Setup:
+                    Use Amazon VPC CNI for native pod networking, allowing pods to get IP addresses from the VPC subnet.
+                    Configure subnets properly (public/private) to ensure secure communication.
+          Service Discovery & Load Balancing:
+                    Use Kubernetes Services (ClusterIP, NodePort, LoadBalancer) for internal/external communication.
+                    For advanced routing, leverage AWS ALB Ingress Controller or Nginx Ingress Controller.
+          Network Security Controls:
+          Implement Kubernetes Network Policies to restrict unwanted traffic between namespaces.
+          Use Security Groups to allow traffic only from authorized sources.
+          Service Mesh for Microservices Communication:
+          Deploy Istio, Linkerd, or AWS App Mesh to handle service-to-service authentication, traffic routing, and observability.
+          These strategies ensure smooth communication between microservices while maintaining security and scalability.
+### 277. How would you ensure proper logging and monitoring for different tenants in a multi-tenant EKS cluster:
+          To monitor and log multiple tenants in a multi-tenant EKS cluster, I would:
+          Use AWS Native Monitoring Tools:
+                    Amazon CloudWatch Logs & Metrics for centralized logging and performance monitoring.
+                    Amazon CloudWatch Container Insights for pod-level monitoring.
+          Implement Separate Logging for Each Tenant:
+                    Use Fluentd, Fluent Bit, or AWS FireLens to forward logs to Amazon S3 or Amazon OpenSearch.
+                    Apply namespace-based log segregation to track tenant-specific logs.
+          Enable Kubernetes Auditing & Security Monitoring:
+                    Enable Kubernetes audit logs to track user activities.
+                    Use AWS GuardDuty for EKS to detect suspicious activities.
+          Use Open-Source Monitoring Tools for Multi-Tenancy:
+                    Deploy Prometheus & Grafana with multi-tenant dashboards.
+                    Use Loki for log aggregation per tenant.
+          This approach ensures that each tenant's logs and monitoring data are isolated, secure, and easy to analyze.
+### 278. How would you reduce cold-start latency in an EKS cluster running event-driven applications:
+          Cold-start latency in event-driven applications occurs when a pod needs to start from scratch due to scale-ups or resource allocation delays. To reduce this:
+          Pre-Warm Pods Using HPA/KEDA:
+                    Use Horizontal Pod Autoscaler (HPA) to keep a minimum number of warm pods running. 
+                    Use KEDA (Kubernetes Event-Driven Autoscaler) for event-driven auto-scaling with lower latency.
+          Enable Faster Node Provisioning:
+                    Use Cluster Autoscaler with AWS EC2 Spot Instance Warm Pools to pre-scale worker nodes.
+                    Opt for AWS Fargate for EKS, which removes cold-start overhead from EC2 instances.
+          Optimize Container Start-up:
+                    Reduce container image size using distroless images.
+                    Enable lazy loading of dependencies to avoid unnecessary delays.
+          Leverage Service Mesh for Caching & Traffic Routing:
+                    Use Istio/App Mesh to route traffic to warm pods before scaling new ones.
+          By implementing these techniques, I can significantly reduce cold-start time for event-driven workloads.
+### 279. How would you test your disaster recovery plan to ensure it works effectively:
+          To test a disaster recovery (DR) plan for an EKS cluster, I would follow a structured approach:
+          Simulate Cluster Failure Scenarios:
+                    Manually delete a node or introduce failures (kubectl delete node).
+                    Simulate a region-wide outage using AWS Fault Injection Simulator (FIS).
+          Verify Backup & Restore Procedures:
+                    Ensure etcd backups (or Velero backups) are restorable.
+                    Restore the cluster in a different AWS region and validate application recovery.
+          Perform Load & Failover Testing:
+                    Stress test applications using Chaos Engineering tools (e.g., LitmusChaos).
+                    Ensure Route 53 DNS failover and AWS Global Accelerator function as expected.
+          Validate Multi-Region Readiness:
+                    Replicate databases (Amazon RDS/Aurora Global Database) and test cross-region failover.
+                    Validate AWS ALB/NLB failover strategies.
+          By conducting these tests regularly (quarterly or bi-annually), I can ensure a robust DR strategy for an EKS environment.
+### 280. What are the security risks of using a public-facing Kubernetes API server, and how can you mitigate them:
+          A public-facing Kubernetes API server is vulnerable to attacks, such as:
+                    Brute force attacks
+                    DDoS attacks
+                    Unauthorized API access
+          Mitigation Strategies:
+                    Restrict API Access:
+                              Use Private API Endpoint in EKS to keep the control plane internal.
+                              Limit API server exposure using VPC peering or AWS PrivateLink.
+                    Implement Strong Authentication & Authorization:
+                              Use IAM roles for Kubernetes RBAC (eksctl create iamidentitymapping).       
+                              Enable OIDC authentication with AWS Cognito or an identity provider.
+                    Rate Limiting & Network Policies:
+                              Apply AWS WAF to limit excessive API requests.
+                              Use Kubernetes Network Policies to control access at the pod level.
+                    Monitor & Audit API Calls:
+                              Enable AWS CloudTrail logging for Kubernetes API events.
+                              Use GuardDuty for EKS to detect unusual API activity.
+          By implementing these measures, I can secure an EKS API server from unauthorized access and malicious attacks.
