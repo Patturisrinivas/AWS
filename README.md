@@ -1735,7 +1735,7 @@
           3. Check DNS Resolution in Private Subnet:
                     Ensure DNS resolution is enabled in the VPC settings so that ecr.amazonaws.com resolves correctly.
                     By using VPC endpoints, ECS tasks in private subnets can securely communicate with ECR without internet access.
-## DAY
+## DAY26
 ### 271. Can you explain a scenario where using Amazon EKS would be more beneficial than running Kubernetes on EC2:
           Yes, let’s consider a scenario where a company is running multiple microservices that require high availability, scalability, and minimal operational overhead.
           If they deploy Kubernetes on EC2 instances (self-managed cluster), they would need to handle tasks like setting up the control plane, managing updates, handling scaling, ensuring high availability, and securing the cluster.
@@ -1879,3 +1879,125 @@
                               Enable AWS CloudTrail logging for Kubernetes API events.
                               Use GuardDuty for EKS to detect unusual API activity.
           By implementing these measures, I can secure an EKS API server from unauthorized access and malicious attacks.
+## DAY27
+### 281. Your team is experiencing slow application performance on an Amazon ECS cluster running Fargate tasks. How would you diagnose and resolve the issue:
+          To diagnose and resolve slow performance in an Amazon ECS cluster running on AWS Fargate, I would follow these steps:
+          Check Task Resource Utilization:
+                    Use CloudWatch Container Insights to analyze CPU and memory utilization.
+                    If usage is near the limit, I would increase CPU and memory allocation per task.
+          Investigate Task Placement & Scaling:
+                    Ensure tasks are evenly distributed across Availability Zones.
+                    If there are sudden traffic spikes, I would configure Application Auto Scaling to dynamically adjust the task count.
+          Network Latency & Connectivity Checks:
+                    Verify that the ECS tasks are using awsvpc networking mode for optimal performance.
+                    Use VPC Flow Logs and AWS X-Ray to detect high latency between services.
+          Storage & Database Bottlenecks:
+                    If the app interacts with Amazon RDS, DynamoDB, or S3, I would check query performance and connection limits.
+                    Enable RDS Performance Insights to optimize database queries.
+          By following this approach, I can pinpoint the performance issue and implement an appropriate fix.
+### 282. How would you handle a situation where an ECS task running on Fargate keeps restarting due to out-of-memory (OOM) errors:
+          To fix OOM errors in Fargate ECS tasks:
+                    Increase memory allocation in the task definition.
+                    Optimize the application to use memory-efficient processing (e.g., reducing large in-memory caching).
+                    Set ulimits (hard and soft memory limits) to prevent the container from using excessive resources.
+                    Enable CloudWatch logging to check for memory leak patterns.
+### 283. Your ECS service is not reaching the desired count of tasks. How would you debug and fix it:
+          If the ECS service is not reaching the desired count of tasks, I would follow this approach:
+          Check for Pending Tasks:
+                    Run aws ecs describe-services to check the event messages in the service.
+                    Use aws ecs list-tasks --desired-status PENDING to identify stuck tasks.
+          Validate IAM Permissions:
+                    Ensure the ECS task execution role has the required permissions to pull images and start containers.
+          Check Cluster Capacity:
+                    If using EC2 launch type, verify that there are enough available resources (CPU, memory, ENI limits) on the instances.
+                    If using Fargate, check AWS service quotas to ensure Fargate is not hitting a soft limit.
+          Task Definition Issues:
+                    Check if the task definition image is valid and accessible.
+                    Ensure environment variables and secrets are correctly configured.
+          Once the root cause is identified, I would apply the appropriate fix and redeploy the service.
+### 284. How would you handle an ECS deployment where tasks intermittently fail due to container health check failures:
+          To address container health check failures in ECS:
+                    Adjust health check parameters (grace period, interval, retries) in the ECS service definition.
+                    Verify if the application inside the container starts slowly; if so, increase the health check grace period.
+                    Use CloudWatch Logs and docker logs to debug application startup failures.
+                    If using an ALB, verify that the target group health check settings align with the application’s readiness.
+### 285. Your EKS cluster is experiencing high latency when handling API requests. How would you troubleshoot this:
+          If my EKS cluster is experiencing high API request latency, I would:
+          Check Cluster Load & Scaling:
+                    Use kubectl top pods and kubectl top nodes to check CPU and memory usage.
+                    Scale up nodes using Cluster Autoscaler if they are under-provisioned.
+          Examine API Server Performance:
+                    Use kubectl get events to see if there are any throttling or rate-limiting issues.
+                    Enable CloudWatch Logs for EKS API Server and check slow response times.
+          Investigate Network Latency:
+                    Use VPC Flow Logs to see if requests are being delayed due to networking issues.
+                    If using an NLB or ALB, check target response times in the AWS Load Balancer metrics.
+          Check DNS Resolution Issues:
+                    EKS heavily relies on CoreDNS; use kubectl logs -n kube-system -l k8s-app=kube-dns to check for DNS resolution failures.
+                    Scale up CoreDNS if needed (kubectl scale deployment coredns --replicas=3).
+          This approach helps pinpoint latency issues and resolve them efficiently.
+### 286. If you suspect that API throttling is causing delays, how would you confirm and fix it:
+          To check and fix API throttling in EKS:
+                    Run kubectl get --raw "/api/v1/nodes?limit=1" to check for 429 (Too Many Requests) errors.
+                    Check Amazon CloudWatch Metrics for API server request rates and throttling limits.
+                    Increase the API server instance size if using Amazon EKS Managed Control Plane.
+                    Implement Horizontal Pod Autoscaler (HPA) to distribute workloads more evenly.
+### 287. Your team wants to migrate a monolithic application to Amazon EKS. What challenges would you anticipate, and how would you overcome them:
+          Migrating a monolithic application to EKS poses several challenges:
+          Breaking Down the Monolith:
+                    I would first identify microservices within the monolithic application.
+                    Gradually extract independent components and deploy them as separate Kubernetes services.
+          Handling Stateful Dependencies:
+                    If the monolith interacts with a database, I would migrate it to Amazon RDS or Amazon DynamoDB.
+                    Use Persistent Volumes (Amazon EBS/EFS) for stateful workloads.
+          Networking and Service Discovery:
+                    Implement Kubernetes Services and Ingress Controllers to route traffic efficiently.
+                    Consider using AWS App Mesh for better observability and service-to-service communication.
+          Deployment Strategy:
+                    I would use a blue-green or canary deployment strategy to minimize downtime.
+                    Implement CI/CD pipelines with AWS CodePipeline & ArgoCD for automated rollouts.
+          By taking a phased approach, I can ensure a smooth migration to EKS while reducing risks.
+### 288. How would you ensure zero downtime during this migration:
+          To ensure zero downtime during migration:
+                    Use DNS-based traffic shifting (e.g., Route 53 weighted routing).
+                    Deploy the new EKS-based system in parallel and gradually migrate traffic.
+                    Implement rolling updates with Kubernetes Deployments to prevent disruptions.
+                    Continuously monitor logs and rollback if necessary.
+### 289. Your company is running ECS on EC2, but you want to migrate to EKS. What challenges would you anticipate, and how would you handle them:
+          Migrating from ECS (EC2 launch type) to EKS presents challenges, including:
+          Container Definition vs. Kubernetes YAML Conversion:
+                    ECS uses task definitions, while EKS requires Kubernetes YAML manifests.  
+                    I would use tools like Kompose to convert ECS task definitions into Kubernetes Deployment YAMLs.
+          Networking Changes:
+                    ECS (awsvpc mode) creates Elastic Network Interfaces (ENIs) per task.
+                    EKS uses Kubernetes Services and CNI plugins for networking.
+                    I would use Amazon VPC CNI for seamless networking integration.
+          Storage Differences:
+                    ECS primarily integrates with EFS, S3, and EBS for persistent storage.
+                    EKS requires Persistent Volumes (PV) and Persistent Volume Claims (PVC).
+                    I would migrate ECS storage solutions to Kubernetes-native persistent storage.
+          Service Discovery & Load Balancing:
+                    ECS uses AWS Service Discovery and ALB integration.
+                    EKS relies on Kubernetes Ingress and CoreDNS.
+                    I would configure an AWS ALB Ingress Controller to maintain external access.
+          Monitoring & Logging:
+                    ECS logs go to CloudWatch by default, while EKS requires FluentBit or CloudWatch Agent.
+                    I would configure CloudWatch Container Insights for better visibility.
+          By carefully planning the migration and using Kubernetes tools for AWS, I would ensure a smooth transition from ECS to EKS.
+### 290. Your team is building an event-driven microservices architecture. Would you choose ECS or EKS? Why:
+          For an event-driven microservices architecture, I would choose based on:
+          Event Processing Needs:
+                    If using Amazon EventBridge, SNS, SQS, ECS integrates natively with AWS event-driven services.
+                    If requiring Kafka, RabbitMQ, or KNative eventing, EKS is the better option.
+          Deployment Strategy:
+                    ECS is ideal for simpler, managed event-driven services.
+                    EKS provides custom event-driven scaling and Kubernetes-native event handling.
+          Auto Scaling & Cost Optimization:
+                    ECS with AWS Fargate scales on demand.
+                    EKS supports KEDA (Kubernetes Event-Driven Autoscaler) for event-based scaling.
+          Long-Term Flexibility:
+                    If the architecture will remain AWS-focused, I would go with ECS.
+                    If planning to expand to hybrid/multi-cloud, I would choose EKS.
+          Final Decision:
+                    For an AWS-native event-driven system, I would use ECS with EventBridge and Fargate.
+                    If requiring Kubernetes-native event scaling, I would choose EKS with KEDA.
