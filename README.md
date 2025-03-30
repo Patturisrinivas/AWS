@@ -2023,3 +2023,58 @@
           AWS KMS ensures security by using AWS-managed Hardware Security Modules (HSMs) to store and process keys securely. It enforces access control through IAM policies and key policies, allowing only authorized users or roles to perform encryption and decryption. AWS CloudTrail logs every key usage event, enabling auditing and monitoring for unauthorized access attempts. Additionally, AWS KMS integrates with AWS Organizations and enables cross-account access controls to enhance security.
 ### 300. What happens to encrypted data when a key is rotated in AWS KMS:
           When a key is rotated in AWS KMS, a new cryptographic key is created, but the old key versions remain available for decryption. Any data encrypted with previous versions of the key can still be decrypted using the corresponding key version. New encryption operations will use the latest key version. AWS KMS ensures backward compatibility, so data remains accessible even after rotation.
+## DAY 29
+### 301. Your company stores sensitive customer data in Amazon S3, and auditors require strict encryption standards. How would you implement encryption using AWS KMS:
+          I would implement Server-Side Encryption with AWS KMS (SSE-KMS) for the S3 bucket by enabling default encryption with a customer-managed key (CMK). This ensures that each object is encrypted using a KMS key instead of an S3-managed key.
+          Steps:
+                    Create a customer-managed key (CMK) in AWS KMS.
+                    Attach an S3 bucket policy that enforces encryption using the CMK.
+                    Enable default encryption in S3 and select AWS KMS key as the encryption method.
+                    Restrict key access using KMS key policies and IAM policies to allow only specific roles or services to decrypt data.
+                    Enable AWS CloudTrail to audit access to the KMS key.
+### 302. How would you design key policies in AWS KMS to restrict access to sensitive data:
+          I would follow the principle of least privilege while designing KMS key policies. This means:
+                    Granting only necessary permissions (e.g., kms:Encrypt, kms:Decrypt, kms:ReEncrypt, etc.) to specific IAM roles or users.
+                    Using condition keys such as aws:SourceIp to restrict access based on IP addresses.
+                    Restricting key usage to specific AWS services or resources (e.g., allowing an S3 bucket but denying access from unauthorized Lambda functions).
+                    Enabling AWS CloudTrail logging for monitoring key access.
+                    Using key policies in combination with IAM policies to enforce access controls.
+### 303. How can AWS CloudTrail help in auditing and troubleshooting AWS KMS key usage:
+          AWS CloudTrail records all AWS KMS API calls, including key creation, deletion, encryption, decryption, and access attempts. If an unauthorized access attempt occurs, CloudTrail logs will show which IAM user or service tried to use the key, the timestamp, and the request details. These logs can be integrated with Amazon CloudWatch to trigger alerts for suspicious activity. This makes CloudTrail essential for security audits and troubleshooting KMS-related issues.
+### 304. Can you integrate AWS Secrets Manager with AWS Lambda for secure access to secrets:
+          Yes, AWS Secrets Manager can be integrated with AWS Lambda securely. The Lambda function can retrieve secrets dynamically at runtime using the AWS SDK or AWS Secrets Manager API. Instead of storing secrets in environment variables, the function fetches them on-demand using IAM role-based authentication. This ensures that sensitive credentials remain secure and are not exposed in the Lambda function code.
+### 305. What precautions should be taken while rotating secrets to avoid service downtime:
+          To prevent downtime while rotating secrets:
+                    Use a test rotation before deploying in production to ensure the application handles new credentials smoothly.
+                    Ensure applications retrieve secrets dynamically rather than caching old credentials.
+                    Implement a grace period where both old and new secrets are valid to prevent failures.
+                    Monitor AWS CloudWatch for errors or failed rotation attempts and set up alerts for quick remediation.
+### 306. What happens if an application loses access to the secret in AWS Secrets Manager:
+           If an application loses access to a secret, it may be due to an IAM permission issue, a revoked role, or a deleted secret. To resolve this:
+                    Check the IAM policy and resource policy to verify that the application has secretsmanager:GetSecretValue permission.
+                    Ensure the AWS Secrets Manager secret still exists and hasn't been deleted.
+                    Check AWS CloudTrail logs to identify any permission changes or access denial issues.
+                    If the secret is manually rotated, ensure the application retrieves the updated secret properly.
+### 307. How would you ensure that secret retrieval from AWS Secrets Manager does not introduce latency in an application:
+          To minimize latency while retrieving secrets:
+                    Cache secrets in-memory within the application to reduce repeated calls to Secrets Manager.
+                    Use AWS SDK’s built-in caching mechanism to fetch secrets efficiently.
+                    Retrieve secrets asynchronously during application startup instead of fetching them on every request.
+                    Optimize network performance by deploying the application in the same AWS Region as the Secrets Manager instance.
+                    Monitor AWS CloudWatch metrics to detect and resolve high-latency API calls
+### 308. Your company is migrating from an on-premises HSM to AWS KMS. How would you securely import and manage keys in AWS KMS:
+          I would use AWS KMS External Key Import to migrate the existing keys. Steps include:
+                    Create a customer-managed key (CMK) in AWS KMS with an external key source.
+                    Download the public wrapping key and import token from AWS KMS.
+                    Use the public key to encrypt the existing key and import it securely into AWS KMS.
+                    Validate the imported key and set an appropriate expiration period.
+### 309. Your organization has multiple AWS accounts and needs to share encryption keys across accounts securely. How would you achieve this:
+          I would use cross-account KMS key sharing by modifying the key policy to allow access from the other AWS account. Steps include:
+                    In the AWS KMS key policy, allow the target AWS account principal to use the key.
+                    In the target AWS account, create an IAM role that assumes access to the shared KMS key.
+                    Use AWS CloudTrail to monitor key usage and prevent unauthorized access.
+### 310. Your application uses KMS for encryption, but you suspect unauthorized key usage. How would you investigate this:
+          Check AWS CloudTrail logs to review KMS API calls and identify unauthorized requests.
+          Verify IAM policies and key policies to ensure no excessive permissions were granted.
+          Use CloudWatch alarms to detect unusual key access patterns.
+          Rotate the key and update application configurations if needed.
